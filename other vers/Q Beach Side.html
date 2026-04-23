@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q Beach Side — Restoran & Plaj Lounge | Side, Antalya</title>
+<meta name="description" content="Q Beach Side, Side Antalya'nın en özel deniz kenarı restoranı ve plaj loungedur. Taze deniz ürünleri, günbatımı manzarası, plaj ve restoran rezervasyonu.">
+<meta name="keywords" content="Side restoran, Antalya beach restaurant, Side plaj lounge, Side yemek, Antalya deniz kenarı restoran, Q Beach Side, Side gece hayatı, Side sunset dinner">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Q Beach Side — Side Antalya'nın En İyi Sahil Restoranı">
+<meta property="og:description" content="Antalya Side'da deniz kenarında fine dining, plaj lounge ve günbatımı kokteylleri. Rezervasyon için hemen arayın.">
+<meta property="og:type" content="restaurant">
+<meta property="og:locale" content="tr_TR">
+<link rel="canonical" href="https://qbeachside.com">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Q Beach Side",
+  "description": "Side Antalya'da deniz kenarı restoran ve plaj lounge",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Sahil Yolu",
+    "addressLocality": "Side",
+    "addressRegion": "Antalya",
+    "addressCountry": "TR"
+  },
+  "telephone": "+90-242-000-0000",
+  "openingHours": "Tu-Su 12:00-00:00",
+  "servesCuisine": ["Deniz Ürünleri", "Akdeniz", "Uluslararası"],
+  "priceRange": "₺₺₺",
+  "url": "https://qbeachside.com",
+  "sameAs": [
+    "https://instagram.com/qbeachside",
+    "https://facebook.com/qbeachside"
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #9e0a22;
+    --black: #18120a;
+    --black2: #221a0e;
+    --white: #fff8ef;
+    --cream: #f5edd8;
+    --gold: #c9952a;
+    --ocean: #1a6e7e;
+    --ocean-light: #2ab3c8;
+    --sand: #e8c87a;
+    --sand-light: #f5e4b8;
+    --sand-dark: #c4a45a;
+    --sunset: #e07a3a;
+    --overlay: rgba(20,14,6,0.55);
+    --nav-h: 72px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ── NAVBAR ────────────────────────────────── */
+  #navbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    height: var(--nav-h);
+    display: flex; align-items: center;
+    padding: 0 40px;
+    transition: background 0.4s, backdrop-filter 0.4s;
+  }
+  #navbar.scrolled {
+    background: rgba(24,18,10,0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(200,16,46,0.18);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .nav-logo img { height: 52px; filter: drop-shadow(0 2px 8px rgba(200,16,46,0.4)); }
+  .nav-logo-text {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  .nav-logo-text span:first-child {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 500; letter-spacing: 2px; color: var(--white);
+  }
+  .nav-logo-text span:last-child {
+    font-size: 9px; letter-spacing: 4px; color: var(--sand); text-transform: uppercase; margin-top: 3px;
+  }
+  nav { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .nav-item { position: relative; }
+  .nav-link {
+    display: block; padding: 10px 16px;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.85); text-decoration: none;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .nav-link:hover { color: var(--red); }
+  .nav-link.active { color: var(--red); }
+  .dropdown {
+    position: absolute; top: 100%; left: 0;
+    min-width: 180px;
+    background: rgba(24,18,10,0.97);
+    border: 1px solid rgba(200,16,46,0.2);
+    border-top: 2px solid var(--red);
+    opacity: 0; pointer-events: none; transform: translateY(-6px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .nav-item:hover .dropdown { opacity: 1; pointer-events: all; transform: translateY(0); }
+  .dropdown a {
+    display: block; padding: 12px 20px;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.75); text-decoration: none;
+    transition: color 0.2s, background 0.2s;
+  }
+  .dropdown a:hover { color: var(--red); background: rgba(200,16,46,0.07); }
+  .nav-cta {
+    margin-left: 12px;
+    padding: 10px 22px;
+    background: var(--red); color: var(--white);
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    border: none; cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+  .nav-cta:hover { background: var(--red-dark); }
+
+  /* ── HERO ──────────────────────────────────── */
+  #hero {
+    position: relative; height: 100vh; min-height: 600px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .video-bg {
+    position: absolute; inset: 0; z-index: 0;
+  }
+  .video-bg video {
+    width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transition: opacity 1.2s;
+  }
+  .video-bg video.active { opacity: 1; }
+  .video-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(20,14,6,0.15) 0%,
+      rgba(20,14,6,0.35) 50%,
+      rgba(24,18,10,0.82) 100%
+    );
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center; padding: 0 20px;
+  }
+  .hero-tagline {
+    font-size: 11px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 20px;
+    animation: fadeUp 1s both 0.3s;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(56px, 8vw, 110px); font-weight: 300;
+    line-height: 1; letter-spacing: -1px;
+    margin-bottom: 20px;
+    animation: fadeUp 1s both 0.5s;
+  }
+  .hero-title em { font-style: italic; color: var(--red); }
+  .hero-sub {
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255,255,255,0.7); margin-bottom: 48px;
+    animation: fadeUp 1s both 0.7s;
+  }
+  .hero-btns {
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 1s both 0.9s;
+  }
+  .btn-primary {
+    padding: 16px 40px; background: var(--red); color: var(--white);
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    border: none; cursor: pointer; transition: all 0.3s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--red-dark); transform: translateY(-2px); }
+  .btn-outline {
+    padding: 16px 40px; background: transparent; color: var(--white);
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.5); font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    animation: fadeUp 1s both 1.2s;
+  }
+  .scroll-line { width: 1px; height: 40px; background: rgba(255,255,255,0.3); animation: scrollLine 2s infinite; }
+  @keyframes scrollLine { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(0.5)} }
+  .video-dots {
+    position: absolute; bottom: 40px; right: 40px; z-index: 2;
+    display: flex; gap: 8px;
+  }
+  .vdot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,0.35); cursor: pointer; transition: all 0.3s;
+  }
+  .vdot.active { background: var(--red); transform: scale(1.4); }
+
+  /* ── SECTION BASE ──────────────────────────── */
+  section { padding: 100px 60px; max-width: 1400px; margin: 0 auto; }
+  .section-full { max-width: 100%; padding: 100px 0; }
+  .section-label {
+    font-size: 10px; letter-spacing: 5px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 16px; display: block;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 64px); font-weight: 300; line-height: 1.1;
+  }
+  .divider {
+    width: 60px; height: 1px; background: var(--red); margin: 28px 0;
+  }
+
+  /* ── DOLULUK ───────────────────────────────── */
+  #doluluk {
+    background: #221a0e;
+    padding: 60px;
+    border-top: 1px solid rgba(201,149,42,0.1);
+    border-bottom: 1px solid rgba(201,149,42,0.1);
+  }
+  .doluluk-inner { max-width: 1400px; margin: 0 auto; }
+  .doluluk-header {
+    display: flex; align-items: baseline; gap: 20px; margin-bottom: 40px;
+  }
+  .doluluk-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; color: var(--white);
+  }
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #4caf50;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #4caf50;
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+  .doluluk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+  @media(max-width:700px){ .doluluk-grid{grid-template-columns:1fr;} }
+  .dol-card {
+    background: rgba(201,149,42,0.1);
+    border: 1px solid rgba(201,149,42,0.12);
+    padding: 28px 32px;
+    position: relative; overflow: hidden;
+  }
+  .dol-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  }
+  .dol-card.restoran::before { background: var(--red); }
+  .dol-card.plaj::before { background: var(--sand); }
+  .dol-card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+  }
+  .dol-card-name { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+  .dol-pct {
+    font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 400; line-height: 1;
+  }
+  .dol-card.restoran .dol-pct { color: var(--red); }
+  .dol-card.plaj .dol-pct { color: var(--sand); }
+  .dol-bar-track {
+    height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-bottom: 12px;
+  }
+  .dol-bar-fill {
+    height: 100%; border-radius: 2px; transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .dol-card.restoran .dol-bar-fill { background: linear-gradient(90deg, var(--red-dark), var(--red)); }
+  .dol-card.plaj .dol-bar-fill { background: linear-gradient(90deg, var(--ocean), var(--sand)); }
+  .dol-status {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .dol-card.restoran .dol-status { color: rgba(200,16,46,0.8); }
+  .dol-card.plaj .dol-status { color: rgba(26,157,196,0.8); }
+  .dol-details {
+    margin-top: 16px; display: flex; gap: 20px;
+    font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 1px;
+  }
+  .dol-details span strong { color: rgba(255,255,255,0.7); }
+  .dol-update {
+    margin-top: 20px; font-size: 9px; letter-spacing: 1px;
+    color: rgba(255,255,255,0.25);
+    text-align: right;
+  }
+
+  /* ── MENU ──────────────────────────────────── */
+  #menu { background: var(--black); }
+  .menu-nav {
+    display: flex; gap: 0; border-bottom: 1px solid rgba(201,149,42,0.12);
+    margin-bottom: 60px; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .menu-nav::-webkit-scrollbar { display: none; }
+  .menu-tab {
+    padding: 14px 28px; font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: rgba(255,255,255,0.45);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all 0.2s; white-space: nowrap; background: none; border-top:none; border-left:none; border-right:none;
+    margin-bottom: -1px;
+  }
+  .menu-tab.active { color: var(--white); border-bottom-color: var(--red); }
+  .menu-tab:hover:not(.active) { color: rgba(255,255,255,0.7); }
+  .menu-panel { display: none; }
+  .menu-panel.active { display: block; }
+  .menu-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px;
+    background: rgba(201,149,42,0.08);
+  }
+  .menu-item {
+    background: #221a0e; padding: 28px;
+    transition: background 0.2s;
+  }
+  .menu-item:hover { background: rgba(201,149,42,0.06); }
+  .menu-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .menu-item-name { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500; line-height: 1.2; }
+  .menu-item-price { font-size: 15px; color: var(--red); font-weight: 500; white-space: nowrap; margin-left: 12px; }
+  .menu-item-desc { font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.6; letter-spacing: 0.3px; }
+  .menu-item-tag {
+    display: inline-block; margin-top: 10px;
+    padding: 3px 8px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+    border: 1px solid rgba(201,168,76,0.35); color: var(--gold);
+  }
+  .menu-img-banner {
+    height: 220px; overflow: hidden; margin-bottom: 60px;
+    position: relative;
+  }
+  .menu-img-banner img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: brightness(0.65);
+  }
+  .menu-img-banner-text {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 48px; font-style: italic;
+    font-weight: 300; text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  }
+
+  /* ── REZERVASYON ───────────────────────────── */
+  #rezervasyon {
+    position: relative; overflow: hidden;
+  }
+  .rezv-bg {
+    position: absolute; inset: 0; z-index: 0;
+  }
+  .rezv-bg img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: brightness(0.28) saturate(0.7);
+  }
+  .rezv-bg::after {
+    content:''; position:absolute; inset:0;
+    background: linear-gradient(135deg, rgba(20,14,6,0.72) 0%, rgba(40,28,10,0.50) 100%);
+  }
+  .rezv-content {
+    position: relative; z-index: 1;
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    padding: 100px 60px;
+  }
+  @media(max-width:900px){ .rezv-content{grid-template-columns:1fr; padding:60px 30px;} }
+  .rezv-left .section-label { margin-bottom: 12px; }
+  .rezv-left p {
+    font-size: 13px; line-height: 1.9; color: rgba(255,255,255,0.6);
+    margin-top: 20px; max-width: 380px;
+  }
+  .rezv-info { margin-top: 36px; display: flex; flex-direction: column; gap: 14px; }
+  .rezv-info-item { display: flex; gap: 14px; align-items: center; }
+  .rezv-info-icon {
+    width: 36px; height: 36px; border: 1px solid rgba(200,16,46,0.3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .rezv-info-icon svg { width: 14px; height: 14px; stroke: var(--red); fill: none; stroke-width: 1.5; }
+  .rezv-info-text { font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.5px; }
+  .rezv-info-text strong { display: block; color: rgba(255,255,255,0.85); font-size: 12px; margin-bottom: 2px; }
+  .rezv-form {
+    background: rgba(24,18,10,0.88);
+    border: 1px solid rgba(201,149,42,0.15);
+    padding: 44px;
+    backdrop-filter: blur(12px);
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width:500px){ .form-row{grid-template-columns:1fr;} }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.45); margin-bottom: 8px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,149,42,0.15);
+    color: var(--white); padding: 13px 16px;
+    font-family: 'Montserrat', sans-serif; font-size: 12px;
+    outline: none; transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-group select option { background: #221a0e; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--sand);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-section-label {
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 14px; margin-top: 8px; display: block;
+  }
+  .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .type-btn {
+    padding: 12px; text-align: center;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);
+    cursor: pointer; transition: all 0.2s; background: transparent;
+  }
+  .type-btn.active {
+    background: var(--red); color: var(--white); border-color: var(--red);
+  }
+  .submit-btn {
+    width: 100%; padding: 16px;
+    background: var(--red); color: var(--white);
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    border: none; cursor: pointer; transition: background 0.2s;
+    margin-top: 8px;
+  }
+  .submit-btn:hover { background: var(--red-dark); }
+  .form-success {
+    display: none; text-align: center; padding: 40px 20px;
+  }
+  .form-success .check { font-size: 48px; color: #4caf50; margin-bottom: 16px; }
+  .form-success p { font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+  .form-success strong { color: var(--white); }
+
+  /* ── FOOTER ────────────────────────────────── */
+  footer {
+    background: #120d06; border-top: 1px solid rgba(201,149,42,0.12);
+    padding: 60px; text-align: center;
+  }
+  footer img { height: 64px; margin-bottom: 20px; opacity: 0.7; }
+  .foot-links { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin-bottom: 28px; }
+  .foot-links a {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s;
+  }
+  .foot-links a:hover { color: var(--red); }
+  .foot-copy { font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 1px; }
+
+  /* ── ANIMATIONS ────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.8s, transform 0.8s;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── ABOUT STRIP ───────────────────────────── */
+  .about-strip {
+    background: #221a0e;
+    border-top: 1px solid rgba(201,149,42,0.08);
+    border-bottom: 1px solid rgba(201,149,42,0.08);
+  }
+  .about-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  }
+  @media(max-width:800px){ .about-inner{grid-template-columns:1fr;} }
+  .about-media { position: relative; height: 480px; overflow: hidden; }
+  .about-media video, .about-media img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: brightness(0.75);
+  }
+  .about-text {
+    padding: 80px 60px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .about-text p {
+    font-size: 13px; line-height: 1.9; color: rgba(255,255,255,0.55); margin-top: 20px;
+  }
+
+  /* ── GALLERY ROW ───────────────────────────── */
+  .gallery-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    padding: 0 0 4px;
+  }
+  @media(max-width:700px){ .gallery-row{grid-template-columns:repeat(2,1fr);} }
+  .gallery-item { position: relative; overflow: hidden; aspect-ratio: 3/4; cursor: pointer; }
+  .gallery-item img { width:100%;height:100%;object-fit:cover; transition: transform 0.5s; }
+  .gallery-item:hover img { transform: scale(1.05); }
+  .gallery-item-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px 16px 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    font-size: 11px; letter-spacing: 1.5px; color: rgba(255,255,255,0.8);
+    text-transform: uppercase; opacity: 0; transition: opacity 0.3s;
+  }
+  .gallery-item:hover .gallery-item-label { opacity: 1; }
+
+  /* ══ MOBILE RESPONSIVE ══════════════════════ */
+  .mob-menu-toggle {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; padding: 8px; margin-left: auto;
+  }
+  .mob-menu-toggle span { width: 24px; height: 1.5px; background: var(--white); transition: all 0.3s; display: block; }
+  .mob-menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+  .mob-menu-toggle.open span:nth-child(2) { opacity: 0; }
+  .mob-menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+  @media (max-width: 900px) {
+    #navbar { padding: 0 20px; }
+    .nav-logo img { height: 40px; }
+    .nav-logo-text span:first-child { font-size: 17px; }
+    nav { display: none; flex-direction: column; gap: 0;
+      position: absolute; top: var(--nav-h); left: 0; right: 0;
+      background: rgba(24,18,10,0.98); backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--red); padding: 16px 0; }
+    nav.mob-open { display: flex; }
+    .mob-menu-toggle { display: flex; }
+    .nav-item { width: 100%; }
+    .nav-link { padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .dropdown { position: static; opacity: 1; pointer-events: all; transform: none;
+      border: none; border-top: none; background: rgba(255,255,255,0.04); }
+    .dropdown a { padding: 10px 36px; }
+    .nav-cta { margin: 16px 20px 8px; text-align: center; display: block; }
+
+    section { padding: 60px 20px; }
+    .hero-title { font-size: clamp(44px,12vw,80px); }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-outline { width: 100%; max-width: 280px; text-align: center; }
+
+    .doluluk-grid { grid-template-columns: 1fr; }
+    #doluluk { padding: 40px 20px; }
+
+    .about-inner { grid-template-columns: 1fr; }
+    .about-media { height: 280px; }
+    .about-text { padding: 40px 24px; }
+
+    .gallery-row { grid-template-columns: repeat(2, 1fr); }
+
+    .rezv-content { grid-template-columns: 1fr; padding: 50px 20px; gap: 40px; }
+    .rezv-form { padding: 28px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+
+    #konum > div { grid-template-columns: 1fr !important; }
+    #konum > div > div:first-child { padding: 40px 24px; }
+    #konum > div > div:last-child { min-height: 260px !important; }
+
+    #sosyal { padding: 50px 20px; }
+    #sosyal > div > div:nth-child(2) { flex-direction: column; align-items: stretch; }
+    .gallery-row.social-photos { grid-template-columns: repeat(3,1fr); }
+    #sosyal > div > div:last-child { grid-template-columns: repeat(3,1fr); }
+
+    .menu-img-banner { height: 150px; }
+    .menu-img-banner-text { font-size: 32px; }
+    .menu-grid { grid-template-columns: 1fr; }
+
+    #ai-panel { padding: 30px 20px; }
+
+    footer { padding: 40px 20px; }
+    .foot-links { gap: 16px; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title { font-size: clamp(36px,14vw,60px); }
+    .hero-tagline { font-size: 9px; }
+    .hero-sub { font-size: 10px; letter-spacing: 2px; }
+    .dol-pct { font-size: 32px; }
+    .section-title { font-size: clamp(26px,8vw,40px); }
+    .rezv-form { padding: 20px 16px; }
+    .menu-tab { padding: 12px 16px; font-size: 9px; letter-spacing: 1.5px; }
+    .type-btn { font-size: 9px; padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────── -->
+<header id="navbar">
+  <a class="nav-logo" href="#hero">
+    <img src="uploads/q beacgh logo.png" alt="Q Beach Side Logo">
+    <div class="nav-logo-text">
+      <span>Q Beach Side</span>
+      <span>Restoran & Lounge</span>
+    </div>
+  </a>
+  <nav>
+    <div class="nav-item">
+      <a class="nav-link" href="#about">Hakkımızda</a>
+    </div>
+    <div class="nav-item">
+      <span class="nav-link">Menü ▾</span>
+      <div class="dropdown">
+        <a href="#menu" onclick="switchTab('starters')">Başlangıçlar</a>
+        <a href="#menu" onclick="switchTab('main')">Ana Yemekler</a>
+        <a href="#menu" onclick="switchTab('seafood')">Deniz Ürünleri</a>
+        <a href="#menu" onclick="switchTab('cocktails')">Kokteyller</a>
+        <a href="#menu" onclick="switchTab('desserts')">Tatlılar</a>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a class="nav-link" href="#doluluk">Doluluk</a>
+    </div>
+    <div class="nav-item">
+      <a class="nav-link" href="#konum">Konum</a>
+    </div>
+    <a class="nav-cta" href="#rezervasyon">Rezervasyon Yap</a>
+  </nav>
+  <div class="mob-menu-toggle" id="mobToggle" onclick="toggleMobMenu()" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+
+<!-- ── HERO ────────────────────────────────────────── -->
+<div id="hero">
+  <div class="video-bg" id="videoBg">
+    <video class="active" autoplay muted loop playsinline id="v0">
+      <source src="uploads/qbeachhavadan.mp4" type="video/mp4">
+    </video>
+    <video muted loop playsinline id="v1">
+      <source src="uploads/etvideo.mp4" type="video/mp4">
+    </video>
+    <video muted loop playsinline id="v2">
+      <source src="uploads/advirtised.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-tagline">Denizin Tam Kıyısında</p>
+    <h1 class="hero-title">Q Beach<br><em>Side</em></h1>
+    <p class="hero-sub">Restoran · Plaj Lounge · Günbatımı Deneyimi</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="#rezervasyon">Masa Rezervasyonu</a>
+      <a class="btn-outline" href="#menu">Menüyü Keşfet</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Aşağı Kaydır</span>
+  </div>
+  <div class="video-dots">
+    <div class="vdot active" onclick="goVideo(0)"></div>
+    <div class="vdot" onclick="goVideo(1)"></div>
+    <div class="vdot" onclick="goVideo(2)"></div>
+  </div>
+</div>
+
+<!-- ── DOLULUK ──────────────────────────────────────── -->
+<div id="doluluk">
+  <div class="doluluk-inner">
+    <div class="doluluk-header">
+      <h2 class="doluluk-title">Anlık Doluluk</h2>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Canlı
+      </div>
+    </div>
+    <div class="doluluk-grid">
+      <!-- Restoran -->
+      <div class="dol-card restoran reveal">
+        <div class="dol-card-header">
+          <span class="dol-card-name">Restoran</span>
+          <div class="dol-pct" id="restoranPct">72%</div>
+        </div>
+        <div class="dol-bar-track">
+          <div class="dol-bar-fill" id="restoranBar" style="width:0%"></div>
+        </div>
+        <div class="dol-status" id="restoranStatus">Masa Mevcut — Rezervasyon Önerilir</div>
+        <div class="dol-details">
+          <span><strong id="restoranDolu">28</strong> / 38 masa dolu</span>
+          <span>Bekleme: <strong>~15 dk</strong></span>
+        </div>
+      </div>
+      <!-- Plaj -->
+      <div class="dol-card plaj reveal">
+        <div class="dol-card-header">
+          <span class="dol-card-name">Plaj Alanı</span>
+          <div class="dol-pct" id="plajPct">45%</div>
+        </div>
+        <div class="dol-bar-track">
+          <div class="dol-bar-fill" id="plajBar" style="width:0%"></div>
+        </div>
+        <div class="dol-status" id="plajStatus">Geniş Alan Mevcut — Şezlong Rezervasyonu</div>
+        <div class="dol-details">
+          <span><strong id="plajDolu">27</strong> / 60 şezlong dolu</span>
+          <span>Şemsiye: <strong>Mevcut</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="dol-update" id="lastUpdate">Son güncelleme: az önce</div>
+  </div>
+</div>
+
+<!-- ── ABOUT ────────────────────────────────────────── -->
+<div class="about-strip" id="about">
+  <div class="about-inner">
+    <div class="about-media">
+      <video autoplay muted loop playsinline>
+        <source src="uploads/qbeachhavadan2.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="about-text reveal">
+      <span class="section-label">Hikayemiz</span>
+      <h2 class="section-title">Denizin Sesini<br>Sofranıza Taşıyoruz</h2>
+      <div class="divider"></div>
+      <p>Q Beach Side, Ege'nin kristal sularına adım atacak kadar yakın, özenle tasarlanmış bir gastronomi ve yaşam deneyimi sunar. Taze deniz ürünlerinden özenle seçilmiş şarap koleksiyonuna, günbatımı kokteylerinden kıyı masalarına kadar her detay siz için düşünüldü.</p>
+      <p style="margin-top:16px">Restoran ve plaj alanlarımız, gündüzün berrak mavisinden akşamın altın tonlarına uzanan benzersiz bir atmosfer yaratır.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── MENU ─────────────────────────────────────────── -->
+<section id="menu">
+  <span class="section-label">Mutfağımız</span>
+  <h2 class="section-title reveal">Lezzetleri Keşfedin</h2>
+  <div class="divider"></div>
+
+  <div class="menu-nav">
+    <button class="menu-tab active" onclick="switchTab('starters',this)">Başlangıçlar</button>
+    <button class="menu-tab" onclick="switchTab('seafood',this)">Deniz Ürünleri</button>
+    <button class="menu-tab" onclick="switchTab('main',this)">Et & Izgara</button>
+    <button class="menu-tab" onclick="switchTab('cocktails',this)">Kokteyller</button>
+    <button class="menu-tab" onclick="switchTab('desserts',this)">Tatlılar</button>
+  </div>
+
+  <!-- BAŞLANGIÇLAR -->
+  <div class="menu-panel active" id="panel-starters">
+    <div class="menu-img-banner">
+      <img src="uploads/avakadosalata.png" alt="Başlangıçlar">
+      <div class="menu-img-banner-text">Başlangıçlar</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Avokado Salatası</span>
+          <span class="menu-item-price">₺280</span>
+        </div>
+        <p class="menu-item-desc">Taze avokado, cherry domates, rokola, limon vinaigrette, kinoa</p>
+        <span class="menu-item-tag">Vegan</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Sığır Carpaccio</span>
+          <span class="menu-item-price">₺420</span>
+        </div>
+        <p class="menu-item-desc">İnce dilim dana bonfile, parmesan, kapari, roka, truffle yağı</p>
+        <span class="menu-item-tag">Şef Önerisi</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Karides Tava</span>
+          <span class="menu-item-price">₺380</span>
+        </div>
+        <p class="menu-item-desc">Sarımsaklı tereyağ, cherry domates, taze fesleğen, sourdough ekmek</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Kalamar Tava</span>
+          <span class="menu-item-price">₺320</span>
+        </div>
+        <p class="menu-item-desc">Çıtır kalamar halkası, limon sosu, taze maydanozlu aioli</p>
+        <span class="menu-item-tag">Popüler</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Tagliata di Manzo</span>
+          <span class="menu-item-price">₺460</span>
+        </div>
+        <p class="menu-item-desc">Roka yatağında dilimlenmiş biftek, parmesan, cherry domates, balsamik</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Ahtapot Izgara</span>
+          <span class="menu-item-price">₺490</span>
+        </div>
+        <p class="menu-item-desc">Marine edilmiş ahtapot, limon yağı, taze kekik, sarımsak puresi</p>
+        <span class="menu-item-tag">Şef Önerisi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DENİZ ÜRÜNLERİ -->
+  <div class="menu-panel" id="panel-seafood">
+    <div class="menu-img-banner">
+      <img src="uploads/avakadosossomon.jpg" alt="Deniz Ürünleri">
+      <div class="menu-img-banner-text">Deniz Ürünleri</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Avokadolu Somon</span>
+          <span class="menu-item-price">₺520</span>
+        </div>
+        <p class="menu-item-desc">Pan-seared somon, avokado salsa, limon sosu, taze kişniş</p>
+        <span class="menu-item-tag">Şef Önerisi</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Surf & Turf</span>
+          <span class="menu-item-price">₺780</span>
+        </div>
+        <p class="menu-item-desc">Bonfile ve ıstakoz kuyruğu, béarnaise sos, kuşkonmaz, taze patates</p>
+        <span class="menu-item-tag">Premium</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Levrek Izgara</span>
+          <span class="menu-item-price">₺440</span>
+        </div>
+        <p class="menu-item-desc">Taze levrek, limon-dereotu sosu, sebze tian, zeytinyağı</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Deniz Mahsulleri Risotto</span>
+          <span class="menu-item-price">₺490</span>
+        </div>
+        <p class="menu-item-desc">Karides, ahtapot, midye, arborio pirinç, safran, parmesan</p>
+        <span class="menu-item-tag">Popüler</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Lokum Bonfile</span>
+          <span class="menu-item-price">₺680</span>
+        </div>
+        <p class="menu-item-desc">Karideslii bonfile, kremali mantar sosu, trüf, taze patates püresi</p>
+        <span class="menu-item-tag">Şef Önerisi</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Çipura Karpaz</span>
+          <span class="menu-item-price">₺390</span>
+        </div>
+        <p class="menu-item-desc">Taze çipura, kapari, zeytinyağı, domates, Akdeniz otları</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ET -->
+  <div class="menu-panel" id="panel-main">
+    <div class="menu-img-banner">
+      <img src="uploads/gordonzolosteak.jpg" alt="Et Izgara">
+      <div class="menu-img-banner-text">Et & Izgara</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Gorgonzola Steak</span>
+          <span class="menu-item-price">₺720</span>
+        </div>
+        <p class="menu-item-desc">250gr ribeye, gorgonzola sosu, çıtır soğan, ev patates kızartması</p>
+        <span class="menu-item-tag">Şef Önerisi</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Lokum Bonfile</span>
+          <span class="menu-item-price">₺650</span>
+        </div>
+        <p class="menu-item-desc">200gr dana bonfile, mantar sosu, yeşil biber, trüf yağı</p>
+        <span class="menu-item-tag">Premium</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Surf & Turf</span>
+          <span class="menu-item-price">₺890</span>
+        </div>
+        <p class="menu-item-desc">Bonfile + ıstakoz kuyruğu, béarnaise sos, kuşkonmaz</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Kuzu Pirzola</span>
+          <span class="menu-item-price">₺580</span>
+        </div>
+        <p class="menu-item-desc">Kekikli kuzu pirzola, taze nane sosu, köz biber, pilav</p>
+        <span class="menu-item-tag">Popüler</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KOKTEYLLEr -->
+  <div class="menu-panel" id="panel-cocktails">
+    <div class="menu-img-banner">
+      <img src="uploads/kokteyl.png" alt="Kokteyller">
+      <div class="menu-img-banner-text">Kokteyller</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Q Signature</span>
+          <span class="menu-item-price">₺240</span>
+        </div>
+        <p class="menu-item-desc">Tequila, mango püresi, jalapeño, limon, tuzlu rim</p>
+        <span class="menu-item-tag">İmza İçki</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Sunset Spritz</span>
+          <span class="menu-item-price">₺220</span>
+        </div>
+        <p class="menu-item-desc">Aperol, prosecco, portakal suyu, gül yaprakları, soda</p>
+        <span class="menu-item-tag">Popüler</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Beach Mojito</span>
+          <span class="menu-item-price">₺200</span>
+        </div>
+        <p class="menu-item-desc">Beyaz rom, limon, nane, şeker kamışı, soda, taze nane buketi</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Sea Breeze</span>
+          <span class="menu-item-price">₺210</span>
+        </div>
+        <p class="menu-item-desc">Cin, salatalık, taze dereotu, tonik, deniz tuzu</p>
+        <span class="menu-item-tag">Serin</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Rosemary Sour</span>
+          <span class="menu-item-price">₺230</span>
+        </div>
+        <p class="menu-item-desc">Bourbon, limon, biberiye şurubu, egg white, angostura</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Virgin Colada</span>
+          <span class="menu-item-price">₺160</span>
+        </div>
+        <p class="menu-item-desc">Hindistancevizi sütü, ananas, limon, nane, soda — alkolsüz</p>
+        <span class="menu-item-tag">Alkolsüz</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TATLILAR -->
+  <div class="menu-panel" id="panel-desserts">
+    <div class="menu-img-banner">
+      <img src="uploads/background.png" alt="Tatlılar" style="filter:brightness(0.5)">
+      <div class="menu-img-banner-text">Tatlılar</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Limon Tart</span>
+          <span class="menu-item-price">₺180</span>
+        </div>
+        <p class="menu-item-desc">Taze limon kreması, İtalyan merengi, çıtır tart hamuru</p>
+        <span class="menu-item-tag">Hafif</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Çikolatalı Lav Kek</span>
+          <span class="menu-item-price">₺200</span>
+        </div>
+        <p class="menu-item-desc">Sıcak çikolata fondant, vanilyalı dondurma, frenk üzümü sosu</p>
+        <span class="menu-item-tag">Popüler</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Panna Cotta</span>
+          <span class="menu-item-price">₺160</span>
+        </div>
+        <p class="menu-item-desc">Vanilyalı panna cotta, çilek coulis, taze mevsim meyveleri</p>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Tiramisu</span>
+          <span class="menu-item-price">₺175</span>
+        </div>
+        <p class="menu-item-desc">Klasik İtalyan tarifi, mascarpone, espresso, kakao</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GALLERY ───────────────────────────────────────── -->
+<div class="gallery-row">
+  <div class="gallery-item">
+    <img src="uploads/dinner.png" alt="Akşam Yemeği">
+    <div class="gallery-item-label">Akşam Yemeği</div>
+  </div>
+  <div class="gallery-item">
+    <img src="uploads/kumsal.jpg" alt="Plaj">
+    <div class="gallery-item-label">Plaj Alanı</div>
+  </div>
+  <div class="gallery-item">
+    <img src="uploads/background.png" alt="Gün Batımı">
+    <div class="gallery-item-label">Gün Batımı</div>
+  </div>
+  <div class="gallery-item">
+    <img src="uploads/aitable.png" alt="Restoran">
+    <div class="gallery-item-label">Restoran</div>
+  </div>
+</div>
+
+<!-- ── REZERVASYON ───────────────────────────────────── -->
+<div id="rezervasyon" style="position:relative;overflow:hidden;">
+  <div class="rezv-bg">
+    <img src="uploads/background2.png" alt="bg">
+  </div>
+  <div class="rezv-content">
+    <div class="rezv-left reveal">
+      <span class="section-label">Rezervasyon</span>
+      <h2 class="section-title">Masanızı<br>Ayırtın</h2>
+      <div class="divider"></div>
+      <p>Denize nazır masanızı veya özel plaj şezlongunuzu önceden ayırtın. Özel günler ve büyük gruplar için bizimle iletişime geçin.</p>
+      <div class="rezv-info">
+        <div class="rezv-info-item">
+          <div class="rezv-info-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="rezv-info-text">
+            <strong>Çalışma Saatleri</strong>
+            Salı – Pazar: 12:00 – 00:00
+          </div>
+        </div>
+        <div class="rezv-info-item">
+          <div class="rezv-info-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.46 2 2 0 0 1 3.6 1.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.15 6.15l1.21-1.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="rezv-info-text">
+            <strong>Rezervasyon Hattı</strong>
+            +90 (242) 000 00 00
+          </div>
+        </div>
+        <div class="rezv-info-item">
+          <div class="rezv-info-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="rezv-info-text">
+            <strong>Konum</strong>
+            Sahil Yolu, Side / Antalya
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rezv-form reveal">
+      <div id="rezv-form-content">
+        <!-- Alan Seçimi -->
+        <span class="form-section-label">Alan Seçimi</span>
+        <div class="type-toggle" style="margin-bottom:0;">
+          <button class="type-btn active" id="typeRestoran" onclick="setType('restoran')">
+            <span style="display:block;font-size:13px;margin-bottom:4px;">🍽</span>
+            Restoran
+          </button>
+          <button class="type-btn" id="typePlaj" onclick="setType('plaj')">
+            <span style="display:block;font-size:13px;margin-bottom:4px;">🏖</span>
+            Plaj Alanı
+          </button>
+        </div>
+
+        <!-- Saat bilgisi bandı -->
+        <div id="saatBilgi" style="margin:12px 0 20px;padding:10px 16px;background:rgba(200,16,46,0.07);border-left:2px solid var(--red);font-size:10px;letter-spacing:1px;color:rgba(255,255,255,0.55);">
+          <span id="saatBilgiText">🕘 Restoran çalışma saatleri: <strong style="color:rgba(255,255,255,0.85);">09:00 – 00:00</strong> · Salı – Pazar</span>
+        </div>
+
+        <!-- Plaj özel seçenekler -->
+        <div id="plajEkstra" style="display:none;margin-bottom:18px;">
+          <span class="form-section-label" style="margin-bottom:10px;">Plaj Tercihi</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button class="type-btn active" id="sezlongBtn" onclick="setPlajTip('sezlong')" style="font-size:10px;padding:10px;">Şezlong & Şemsiye</button>
+            <button class="type-btn" id="vipBtn" onclick="setPlajTip('vip')" style="font-size:10px;padding:10px;">VIP Koltuk Alanı</button>
+          </div>
+          <div style="margin-top:10px;">
+            <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Şezlong / Koltuk Adedi</label>
+            <select id="rSezlong" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:12px 16px;font-family:'Montserrat',sans-serif;font-size:12px;outline:none;">
+              <option>1 Adet</option><option selected>2 Adet</option>
+              <option>3 Adet</option><option>4 Adet</option><option>4+ Adet</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ad Soyad</label>
+            <input type="text" id="rName" placeholder="Adınız">
+          </div>
+          <div class="form-group">
+            <label>Telefon</label>
+            <input type="tel" id="rPhone" placeholder="+90 5xx xxx xx xx">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tarih</label>
+            <input type="date" id="rDate">
+          </div>
+          <div class="form-group">
+            <label>Saat</label>
+            <select id="rTime">
+              <option value="">Saat Seçin</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="guestLabel">Kişi Sayısı</label>
+            <select id="rGuests">
+              <option>1 Kişi</option><option>2 Kişi</option>
+              <option>3 Kişi</option><option selected>4 Kişi</option>
+              <option>5 Kişi</option><option>6 Kişi</option>
+              <option>7-10 Kişi</option><option>10+ Kişi</option>
+            </select>
+          </div>
+          <div class="form-group" id="occasionGroup">
+            <label>Özel Gün</label>
+            <select id="rOccasion">
+              <option value="">Seçiniz</option>
+              <option>Doğum Günü</option>
+              <option>Yıl Dönümü</option>
+              <option>Nişan</option>
+              <option>İş Yemeği</option>
+              <option>Diğer</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notlar</label>
+          <textarea id="rNotes" placeholder="Özel istekler, alerji bilgisi, şemsiye tercihi…"></textarea>
+        </div>
+        <button class="submit-btn" onclick="submitRezervasyon()">Rezervasyon Talebi Gönder</button>
+      </div>
+      <div class="form-success" id="rezv-success">
+        <div class="check">✓</div>
+        <p><strong>Rezervasyonunuz Alındı!</strong><br><br>
+        En kısa sürede telefon veya e-posta ile teyid edeceğiz.<br>
+        Sizi Q Beach Side'da ağırlamaktan mutluluk duyacağız.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── KONUM & HARİTA ─────────────────────────────────── -->
+<div id="konum" style="background:linear-gradient(180deg,#221a0e 0%,#18120a 100%); border-top:1px solid rgba(201,149,42,0.1);">
+  <div style="max-width:1400px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; min-height:420px;">
+    <div style="padding:70px 60px; display:flex; flex-direction:column; justify-content:center;">
+      <span class="section-label">Bizi Bulun</span>
+      <h2 class="section-title reveal" style="font-size:clamp(28px,4vw,48px);">Side'nin Kalbinde,<br>Denizin Tam Kıyısında</h2>
+      <div class="divider"></div>
+      <div style="display:flex;flex-direction:column;gap:18px;margin-top:8px;">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border:1px solid rgba(200,16,46,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:3px;">Adres</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">Sahil Yolu No:1<br>Side, Manavgat / Antalya 07330</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border:1px solid rgba(200,16,46,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:3px;">Çalışma Saatleri</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">Salı – Pazar: 12:00 – 00:00<br>Pazartesi: Kapalı</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:36px;height:36px;border:1px solid rgba(200,16,46,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C8102E" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.46 2 2 0 0 1 3.6 1.26h3a2 2 0 0 1 2 1.72c.1.98.35 1.94.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.15 6.15l1.21-1.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);margin-bottom:3px;">Telefon & E-posta</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">+90 (242) 000 00 00<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ef86818980af9e8d8a8e8c879c868b8ac18c8082">[email&#160;protected]</a></div>
+          </div>
+        </div>
+      </div>
+      <a href="https://maps.google.com/?q=Side,Antalya,Turkey" target="_blank"
+         style="margin-top:28px;display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:1px solid rgba(200,16,46,0.4);color:var(--red);font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;width:fit-content;transition:all 0.2s;"
+         onmouseover="this.style.background='rgba(200,16,46,0.1)'" onmouseout="this.style.background='transparent'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Google Maps'te Aç
+      </a>
+    </div>
+    <div style="position:relative;overflow:hidden;min-height:360px;">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12743.60!2d31.3878!3d36.7688!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14c5cb5e9dc62d11%3A0x6c7e456c71a5e6ed!2sSide%2C%20Manavgat%2FAntalya!5e0!3m2!1str!2str!4v1700000000"
+        width="100%" height="100%" style="border:0;filter:grayscale(0.3) invert(0.05);position:absolute;inset:0;"
+        allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ── SOSYAL MEDYA ───────────────────────────────────── -->
+<div id="sosyal" style="background:linear-gradient(180deg,#18120a 0%,#221a0e 100%);padding:70px 60px;border-top:1px solid rgba(201,149,42,0.08);">
+  <div style="max-width:1400px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <span class="section-label" style="display:block;text-align:center;">Bizi Takip Edin</span>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,48px);font-weight:300;">#QBeachSide</h2>
+    </div>
+    <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:56px;">
+      <!-- Instagram -->
+      <a href="https://instagram.com/qbeachside" target="_blank" class="social-card" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(228,64,95,0.5)';this.style.background='rgba(228,64,95,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.5">
+          <defs><linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#e6683c"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs>
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">Instagram</div>
+          <div style="font-size:13px;font-weight:500;">@qbeachside</div>
+        </div>
+      </a>
+      <!-- Facebook -->
+      <a href="https://facebook.com/qbeachside" target="_blank" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(59,130,246,0.5)';this.style.background='rgba(59,130,246,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#4267B2" stroke="none"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">Facebook</div>
+          <div style="font-size:13px;font-weight:500;">Q Beach Side</div>
+        </div>
+      </a>
+      <!-- TripAdvisor -->
+      <a href="https://tripadvisor.com" target="_blank" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(52,168,83,0.5)';this.style.background='rgba(52,168,83,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#34A853" stroke="none"><circle cx="7" cy="13" r="3"/><circle cx="17" cy="13" r="3"/><path d="M12 5C8.5 5 5.5 6.5 3.5 9H2l2.5 2.5A5 5 0 0 0 7 16a5 5 0 0 0 4-2h2a5 5 0 0 0 4 2 5 5 0 0 0 2.5-4.5L22 9h-1.5C18.5 6.5 15.5 5 12 5z"/></svg>
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">TripAdvisor</div>
+          <div style="font-size:13px;font-weight:500;">Yorumları Gör</div>
+        </div>
+      </a>
+      <!-- WhatsApp -->
+      <a href="https://wa.me/902420000000" target="_blank" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(37,211,102,0.5)';this.style.background='rgba(37,211,102,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        <div>
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">WhatsApp</div>
+          <div style="font-size:13px;font-weight:500;">Hızlı İletişim</div>
+        </div>
+      </a>
+    </div>
+    <!-- Foto grid teaser -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;opacity:0.85;">
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="uploads/dinner.png" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'"></div>
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="uploads/avakadosossomon.jpg" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'"></div>
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="uploads/kokteyl.png" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'"></div>
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="uploads/kumsal.jpg" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'"></div>
+      <div style="aspect-ratio:1;overflow:hidden;"><img src="uploads/aitable.png" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI GÜNLÜK POST ÜRETECİ (Admin Paneli) ─────────── -->
+<div id="ai-panel" style="background: #120d06;border-top:1px solid rgba(201,149,42,0.06);padding:40px 60px;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;" onclick="toggleAI()">
+      <div style="width:6px;height:6px;background:var(--red);border-radius:50%;"></div>
+      <span style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);">Yönetim Paneli — Günlük Sosyal Medya Post Üreteci</span>
+      <span id="ai-arrow" style="font-size:10px;color:rgba(255,255,255,0.2);margin-left:auto;">▼</span>
+    </div>
+    <div id="ai-body" style="display:none;margin-top:24px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);display:block;margin-bottom:8px;">Platform</label>
+          <select id="ai-platform" style="width:100%;background:rgba(201,149,42,0.07);border:1px solid rgba(201,149,42,0.15);color:rgba(255,255,255,0.7);padding:10px 14px;font-family:Montserrat,sans-serif;font-size:11px;outline:none;">
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="whatsapp">WhatsApp Durum</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);display:block;margin-bottom:8px;">Konu / Tema</label>
+          <select id="ai-topic" style="width:100%;background:rgba(201,149,42,0.07);border:1px solid rgba(201,149,42,0.15);color:rgba(255,255,255,0.7);padding:10px 14px;font-family:Montserrat,sans-serif;font-size:11px;outline:none;">
+            <option value="gunluk">Günlük Davet</option>
+            <option value="menu">Menüden Öne Çıkan</option>
+            <option value="gunbatimi">Günbatımı / Atmosfer</option>
+            <option value="rezervasyon">Rezervasyon Hatırlatması</option>
+            <option value="hafta_sonu">Hafta Sonu Özel</option>
+            <option value="yaz">Yaz Sezonu</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);display:block;margin-bottom:8px;">Ekstra Not (isteğe bağlı)</label>
+        <input id="ai-extra" type="text" placeholder="Örn: Bu akşam levrek özel fiyatı var" style="width:100%;background:rgba(201,149,42,0.07);border:1px solid rgba(201,149,42,0.15);color:rgba(255,255,255,0.7);padding:10px 14px;font-family:Montserrat,sans-serif;font-size:11px;outline:none;">
+      </div>
+      <button onclick="generatePost()" style="padding:12px 28px;background:var(--red);color:#fff;border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:background 0.2s;" onmouseover="this.style.background='#9e0a22'" onmouseout="this.style.background='var(--red)'">
+        Post Oluştur
+      </button>
+      <div id="ai-result" style="display:none;margin-top:20px;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);padding:20px;position:relative;">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:12px;">Oluşturulan Post</div>
+          <div id="ai-output" style="font-size:13px;line-height:1.8;color:rgba(255,255,255,0.75);white-space:pre-wrap;"></div>
+          <button onclick="copyPost()" style="margin-top:16px;padding:8px 20px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)';this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='rgba(255,255,255,0.5)'">Kopyala</button>
+        </div>
+      </div>
+      <div id="ai-loading" style="display:none;margin-top:16px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;">Post oluşturuluyor…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ────────────────────────────────────────── -->
+<footer>
+  <img src="uploads/q beacgh logo.png" alt="Q Beach Side">
+  <div style="font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--sand);opacity:0.6;margin-bottom:24px;">Side · Antalya · Türkiye</div>
+  <div class="foot-links">
+    <a href="#hero">Ana Sayfa</a>
+    <a href="#menu">Menü</a>
+    <a href="#doluluk">Doluluk</a>
+    <a href="#rezervasyon">Rezervasyon</a>
+    <a href="#konum">Konum</a>
+    <a href="https://instagram.com/qbeachside" target="_blank">Instagram</a>
+    <a href="https://facebook.com/qbeachside" target="_blank">Facebook</a>
+    <a href="#">Gizlilik</a>
+  </div>
+  <p class="foot-copy">© 2025 Q Beach Side Restoran & Lounge · Side, Antalya · Tüm Hakları Saklıdır</p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── Mobile menu ─────────────────────────────────────
+  function toggleMobMenu() {
+    const nav = document.querySelector('nav');
+    const tog = document.getElementById('mobToggle');
+    nav.classList.toggle('mob-open');
+    tog.classList.toggle('open');
+  }
+  // Close mobile menu on link click
+  document.querySelectorAll('.nav-link, .nav-cta, .dropdown a').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelector('nav').classList.remove('mob-open');
+      document.getElementById('mobToggle').classList.remove('open');
+    });
+  });
+
+  // ── Navbar scroll ───────────────────────────────────
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // ── Video switcher ──────────────────────────────────
+  let currentVideo = 0;
+  const videos = [document.getElementById('v0'), document.getElementById('v1'), document.getElementById('v2')];
+  const dots = document.querySelectorAll('.vdot');
+
+  function goVideo(idx) {
+    videos[currentVideo].classList.remove('active');
+    dots[currentVideo].classList.remove('active');
+    currentVideo = idx;
+    videos[currentVideo].classList.add('active');
+    videos[currentVideo].play();
+    dots[currentVideo].classList.add('active');
+  }
+
+  setInterval(() => {
+    goVideo((currentVideo + 1) % videos.length);
+  }, 9000);
+
+  // ── Menu tabs ───────────────────────────────────────
+  function switchTab(id, btn) {
+    document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    else {
+      document.querySelectorAll('.menu-tab').forEach(t => {
+        if (t.textContent.toLowerCase().includes(id.substring(0,4))) t.classList.add('active');
+      });
+    }
+  }
+
+  // ── Doluluk bars ────────────────────────────────────
+  function animateBars() {
+    setTimeout(() => {
+      document.getElementById('restoranBar').style.width = '72%';
+      document.getElementById('plajBar').style.width = '45%';
+    }, 400);
+  }
+
+  // Simulate live updates
+  function liveUpdate() {
+    const rPct = Math.floor(65 + Math.random() * 20);
+    const pPct = Math.floor(35 + Math.random() * 30);
+    document.getElementById('restoranPct').textContent = rPct + '%';
+    document.getElementById('plajPct').textContent = pPct + '%';
+    document.getElementById('restoranBar').style.width = rPct + '%';
+    document.getElementById('plajBar').style.width = pPct + '%';
+    const rDolu = Math.round(38 * rPct / 100);
+    const pDolu = Math.round(60 * pPct / 100);
+    document.getElementById('restoranDolu').textContent = rDolu;
+    document.getElementById('plajDolu').textContent = pDolu;
+    const rStatus = rPct > 85 ? 'Neredeyse Dolu — Hemen Rezervasyon Yapın' :
+                    rPct > 60 ? 'Masa Mevcut — Rezervasyon Önerilir' : 'Bol Alan Mevcut';
+    const pStatus = pPct > 80 ? 'Neredeyse Dolu — Hemen Rezervasyon Yapın' :
+                    pPct > 50 ? 'Sınırlı Şezlong — Rezervasyon Önerilir' : 'Geniş Alan Mevcut — Şezlong Rezervasyonu';
+    document.getElementById('restoranStatus').textContent = rStatus;
+    document.getElementById('plajStatus').textContent = pStatus;
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = 'Son güncelleme: ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+  }
+  setInterval(liveUpdate, 30000);
+
+  // ── Reveal on scroll ────────────────────────────────
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        if (e.target.closest('#doluluk')) animateBars();
+      }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Also trigger bars when doluluk scrolls into view
+  const dolulukObs = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) animateBars();
+  }, { threshold: 0.3 });
+  dolulukObs.observe(document.getElementById('doluluk'));
+
+  // ── Reservation type ────────────────────────────────
+  let currentType = 'restoran';
+  let currentPlajTip = 'sezlong';
+  const RESTORAN_SAATLER = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30'];
+  const PLAJ_SAATLER = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+  function fillSaatler(saatler) {
+    const sel = document.getElementById('rTime');
+    sel.innerHTML = '<option value="">Saat Seçin</option>';
+    saatler.forEach(function(s){ const o = document.createElement('option'); o.value=s; o.textContent=s; sel.appendChild(o); });
+  }
+  function setType(type) {
+    currentType = type;
+    document.getElementById('typeRestoran').classList.toggle('active', type === 'restoran');
+    document.getElementById('typePlaj').classList.toggle('active', type === 'plaj');
+    document.getElementById('plajEkstra').style.display = type === 'plaj' ? 'block' : 'none';
+    if (type === 'restoran') {
+      fillSaatler(RESTORAN_SAATLER);
+      document.getElementById('saatBilgiText').innerHTML = 'Restoran calisma saatleri: <strong style="color:rgba(255,255,255,0.85);">09:00 - 00:00</strong> · Sali - Pazar';
+      document.getElementById('saatBilgi').style.borderLeftColor = 'var(--red)';
+      document.getElementById('occasionGroup').style.display = 'block';
+    } else {
+      fillSaatler(PLAJ_SAATLER);
+      document.getElementById('saatBilgiText').innerHTML = 'Plaj calisma saatleri: <strong style="color:rgba(255,255,255,0.85);">09:00 - 18:00</strong> · Her gun';
+      document.getElementById('saatBilgi').style.borderLeftColor = 'var(--sand)';
+      document.getElementById('occasionGroup').style.display = 'none';
+    }
+  }
+  function setPlajTip(tip) {
+    currentPlajTip = tip;
+    document.getElementById('sezlongBtn').classList.toggle('active', tip === 'sezlong');
+    document.getElementById('vipBtn').classList.toggle('active', tip === 'vip');
+  }
+  fillSaatler(RESTORAN_SAATLER);
+
+  // ── Submit reservation ──────────────────────────────
+  function submitRezervasyon() {
+    const name = document.getElementById('rName').value.trim();
+    const phone = document.getElementById('rPhone').value.trim();
+    const date = document.getElementById('rDate').value;
+    const time = document.getElementById('rTime').value;
+    if (!name || !phone || !date || !time) {
+      alert('Lütfen ad, telefon, tarih ve saat alanlarını doldurun.');
+      return;
+    }
+    document.getElementById('rezv-form-content').style.display = 'none';
+    document.getElementById('rezv-success').style.display = 'block';
+  }
+
+  // ── Set min date ────────────────────────────────────
+  document.getElementById('rDate').min = new Date().toISOString().split('T')[0];
+
+  // ── AI Panel toggle ─────────────────────────────────
+  function toggleAI() {
+    const body = document.getElementById('ai-body');
+    const arrow = document.getElementById('ai-arrow');
+    const open = body.style.display === 'block';
+    body.style.display = open ? 'none' : 'block';
+    arrow.textContent = open ? '▼' : '▲';
+  }
+
+  // ── Generate post ───────────────────────────────────
+  async function generatePost() {
+    const platform = document.getElementById('ai-platform').value;
+    const topic = document.getElementById('ai-topic').value;
+    const extra = document.getElementById('ai-extra').value;
+    const platformNames = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
+    const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
+
+    document.getElementById('ai-loading').style.display = 'block';
+    document.getElementById('ai-result').style.display = 'none';
+
+    const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.
+
+${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}
+
+Platforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
+
+    try {
+      const text = await window.claude.complete({ messages: [{ role: 'user', content: prompt }] });
+      document.getElementById('ai-output').textContent = text;
+      document.getElementById('ai-result').style.display = 'block';
+    } catch(e) {
+      document.getElementById('ai-output').textContent = 'Post oluşturulurken hata oluştu. Lütfen tekrar deneyin.';
+      document.getElementById('ai-result').style.display = 'block';
+    } finally {
+      document.getElementById('ai-loading').style.display = 'none';
+    }
+  }
+
+  // ── Copy post ───────────────────────────────────────
+  function copyPost() {
+    const text = document.getElementById('ai-output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Kopyalandı ✓';
+      setTimeout(() => btn.textContent = 'Kopyala', 2000);
+    });
+  }
+</script>
+</body>
+</html>
