@@ -306,6 +306,7 @@
       <div class="nav-group-label">Yönetim</div>
       <button class="nav-btn" onclick="showTab('doluluk',this)"><span class="icon">📊</span><span>Doluluk</span></button>
       <button class="nav-btn" onclick="showTab('menu',this)"><span class="icon">🍽</span><span>Menü</span></button>
+      <button class="nav-btn" onclick="showTab('posts',this)"><span class="icon">✦</span><span>Post Üretici</span></button>
       <div class="nav-group-label">Diğer</div>
       <button class="nav-btn" onclick="window.open('Q Beach Side.html','_blank')"><span class="icon">↗</span><span>Siteye Git</span></button>
     </nav>
@@ -513,8 +514,79 @@
       <div class="menu-mgmt-grid" id="menuMgmtGrid"></div>
     </div>
 
-  </main>
-</div>
+    <!-- POST ÜRETİCİ -->
+    <div class="tab-panel" id="tab-posts">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Post Üretici</div>
+          <div class="page-sub">AI ile Sosyal Medya İçeriği Oluştur</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <!-- Sol: Üretici -->
+        <div>
+          <div class="section-card">
+            <div class="section-card-head"><div class="section-card-title">Post Oluştur</div></div>
+            <div class="section-card-body">
+              <div class="fg">
+                <label>Platform</label>
+                <select id="ai-platform">
+                  <option value="instagram">Instagram</option>
+                  <option value="facebook">Facebook</option>
+                  <option value="whatsapp">WhatsApp Durum</option>
+                  <option value="tiktok">TikTok</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Konu / Tema</label>
+                <select id="ai-topic">
+                  <option value="gunluk">Günlük Davet</option>
+                  <option value="menu">Menüden Öne Çıkan</option>
+                  <option value="gunbatimi">Günbatımı / Atmosfer</option>
+                  <option value="rezervasyon">Rezervasyon Hatırlatması</option>
+                  <option value="hafta_sonu">Hafta Sonu Özel</option>
+                  <option value="yaz">Yaz Sezonu</option>
+                </select>
+              </div>
+              <div class="fg">
+                <label>Ekstra Not (isteğe bağlı)</label>
+                <input type="text" id="ai-extra" placeholder="Örn: Bu akşam levrek özel fiyatı var">
+              </div>
+              <button class="add-btn" onclick="generatePost()">Post Oluştur</button>
+              <div id="ai-loading" style="display:none;margin-top:14px;font-size:10px;color:var(--muted);letter-spacing:1px;">⏳ Oluşturuluyor…</div>
+            </div>
+          </div>
+
+          <div class="section-card" id="ai-result-card" style="display:none;">
+            <div class="section-card-head"><div class="section-card-title">Oluşturulan Post</div></div>
+            <div class="section-card-body">
+              <div id="ai-output" style="font-size:13px;line-height:1.8;color:rgba(255,248,239,0.8);white-space:pre-wrap;margin-bottom:16px;"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="add-btn" onclick="publishPost()">✦ Siteye Yayınla</button>
+                <button class="action-btn" onclick="copyPost()">Kopyala</button>
+              </div>
+              <div id="publish-ok" style="display:none;margin-top:10px;font-size:10px;color:var(--green);letter-spacing:1px;">✓ Site güncellendi — Duyurular bölümünde yayında</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sağ: Yayındaki postlar -->
+        <div>
+          <div class="section-card">
+            <div class="section-card-head">
+              <div class="section-card-title">Yayındaki Postlar</div>
+              <button class="action-btn cancel" onclick="clearPosts()">Tümünü Sil</button>
+            </div>
+            <div class="section-card-body" id="published-posts-list" style="display:flex;flex-direction:column;gap:14px;">
+              <div class="empty-state" id="no-posts">Henüz yayınlanan post yok.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
 
 <div id="toast">✓ İşlem tamamlandı</div>
 
@@ -590,7 +662,7 @@ function showTab(tab, btn) {
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'rezervasyonlar') renderRezv('all');
   if (tab === 'doluluk') loadDoluluk();
-  if (tab === 'menu') renderMenu();
+  if (tab === 'posts') renderPublishedPosts();
 }
 
 // ── TOAST ─────────────────────────────────────────────
@@ -800,9 +872,102 @@ function delMenuItem(cat, idx) {
   toast('✓ Ürün silindi');
 }
 
+// ── POST ÜRETİCİ ─────────────────────────────────────
+async function generatePost() {
+  const platform = document.getElementById('ai-platform').value;
+  const topic = document.getElementById('ai-topic').value;
+  const extra = document.getElementById('ai-extra').value;
+  const platformNames = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
+  const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
+
+  document.getElementById('ai-loading').style.display = 'block';
+  document.getElementById('ai-result-card').style.display = 'none';
+  document.getElementById('publish-ok').style.display = 'none';
+
+  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.
+
+${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}
+
+Platforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
+
+  try {
+    const text = await window.claude.complete({ messages: [{ role: 'user', content: prompt }] });
+    document.getElementById('ai-output').textContent = text;
+    document.getElementById('ai-result-card').style.display = 'block';
+    document.getElementById('ai-result-card').dataset.platform = platform;
+  } catch(e) {
+    document.getElementById('ai-output').textContent = 'Post oluşturulurken hata oluştu.';
+    document.getElementById('ai-result-card').style.display = 'block';
+  } finally {
+    document.getElementById('ai-loading').style.display = 'none';
+  }
+}
+
+function publishPost() {
+  const text = document.getElementById('ai-output').textContent.trim();
+  const platform = document.getElementById('ai-result-card').dataset.platform || document.getElementById('ai-platform').value;
+  if (!text) return;
+  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+  const now = new Date();
+  posts.push({
+    id: Date.now().toString(),
+    platform,
+    text,
+    date: now.toLocaleDateString('tr-TR')
+  });
+  localStorage.setItem('qbs_posts', JSON.stringify(posts));
+  document.getElementById('publish-ok').style.display = 'block';
+  renderPublishedPosts();
+  toast('✓ Post siteye yayınlandı');
+}
+
+function copyPost() {
+  const text = document.getElementById('ai-output').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('✓ Kopyalandı'));
+}
+
+function clearPosts() {
+  if (!confirm('Tüm postlar silinsin mi?')) return;
+  localStorage.removeItem('qbs_posts');
+  renderPublishedPosts();
+  toast('✓ Postlar silindi');
+}
+
+function renderPublishedPosts() {
+  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+  const container = document.getElementById('published-posts-list');
+  const empty = document.getElementById('no-posts');
+  if (!posts.length) {
+    container.innerHTML = '<div class="empty-state" id="no-posts">Henüz yayınlanan post yok.</div>';
+    return;
+  }
+  const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵' };
+  container.innerHTML = posts.slice().reverse().map(p => `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px;position:relative;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||''} ${p.platform}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:9px;color:var(--muted);">${p.date}</span>
+          <button class="action-btn cancel" onclick="deletePost('${p.id}')" style="padding:3px 8px;font-size:8px;">Sil</button>
+        </div>
+      </div>
+      <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.6);white-space:pre-wrap;">${p.text.substring(0,180)}${p.text.length>180?'…':''}</p>
+    </div>
+  `).join('');
+}
+
+function deletePost(id) {
+  let posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+  posts = posts.filter(p => p.id !== id);
+  localStorage.setItem('qbs_posts', JSON.stringify(posts));
+  renderPublishedPosts();
+  toast('✓ Post silindi');
+}
+
 // ── INIT ─────────────────────────────────────────────
 function initApp() {
   renderDashboard();
+  renderPublishedPosts();
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
 }
 
