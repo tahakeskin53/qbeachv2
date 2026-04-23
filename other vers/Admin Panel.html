@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q Beach Side — Admin Paneli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #9e0a22;
+    --bg: #0f0b07;
+    --bg2: #1a140d;
+    --bg3: #221a0e;
+    --border: rgba(201,149,42,0.12);
+    --gold: #c9952a;
+    --white: #fff8ef;
+    --muted: rgba(255,248,239,0.45);
+    --green: #3dba6e;
+    --orange: #e07a3a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Montserrat',sans-serif; background:var(--bg); color:var(--white); min-height:100vh; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center; z-index:999;
+  }
+  .login-box {
+    width:360px; background:var(--bg2);
+    border:1px solid var(--border);
+    padding:48px 40px;
+  }
+  .login-logo { display:flex; align-items:center; gap:12px; margin-bottom:36px; }
+  .login-logo img { height:44px; }
+  .login-logo-text { font-family:'Cormorant Garamond',serif; font-size:20px; letter-spacing:1px; }
+  .login-logo-sub { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-top:2px; }
+  .login-label { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+  .login-input {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    color:var(--white); padding:12px 14px; font-family:'Montserrat',sans-serif; font-size:13px;
+    outline:none; transition:border-color 0.2s; margin-bottom:16px;
+  }
+  .login-input:focus { border-color:var(--gold); }
+  .login-btn {
+    width:100%; padding:13px; background:var(--red); color:var(--white);
+    font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    border:none; cursor:pointer; transition:background 0.2s; margin-top:4px;
+  }
+  .login-btn:hover { background:var(--red-dark); }
+  .login-err { font-size:10px; color:var(--red); letter-spacing:1px; margin-top:10px; display:none; }
+
+  /* ── LAYOUT ── */
+  #app { display:none; min-height:100vh; }
+  .sidebar {
+    position:fixed; top:0; left:0; bottom:0; width:220px;
+    background:var(--bg2); border-right:1px solid var(--border);
+    display:flex; flex-direction:column;
+  }
+  .sidebar-logo {
+    padding:28px 24px 24px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px;
+  }
+  .sidebar-logo img { height:36px; }
+  .sidebar-logo-text { font-size:11px; letter-spacing:1px; color:var(--white); }
+  .sidebar-logo-sub { font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-top:2px; }
+  .sidebar-nav { flex:1; padding:16px 0; overflow-y:auto; }
+  .nav-group-label {
+    font-size:8px; letter-spacing:3px; text-transform:uppercase; color:var(--muted);
+    padding:12px 24px 6px;
+  }
+  .nav-btn {
+    display:flex; align-items:center; gap:10px;
+    width:100%; padding:11px 24px;
+    font-size:11px; letter-spacing:1px; color:rgba(255,248,239,0.6);
+    background:none; border:none; cursor:pointer; transition:all 0.2s;
+    text-align:left;
+  }
+  .nav-btn:hover { color:var(--white); background:rgba(255,255,255,0.04); }
+  .nav-btn.active { color:var(--white); background:rgba(200,16,46,0.1); border-right:2px solid var(--red); }
+  .nav-btn .icon { font-size:14px; width:18px; text-align:center; }
+  .sidebar-footer {
+    padding:16px 24px; border-top:1px solid var(--border);
+    font-size:10px; color:var(--muted); display:flex; justify-content:space-between; align-items:center;
+  }
+  .logout-btn {
+    font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--red); background:none; border:none; cursor:pointer;
+    transition:opacity 0.2s;
+  }
+  .logout-btn:hover { opacity:0.7; }
+
+  .main { margin-left:220px; padding:40px; min-height:100vh; }
+  .topbar {
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:36px;
+  }
+  .page-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:400; }
+  .page-sub { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .live-badge {
+    display:flex; align-items:center; gap:6px;
+    font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--green);
+  }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 1.8s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
+
+  /* ── TABS ── */
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── CARDS ── */
+  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card {
+    background:var(--bg2); border:1px solid var(--border); padding:24px 20px;
+    position:relative; overflow:hidden;
+  }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .stat-card.red::before { background:var(--red); }
+  .stat-card.gold::before { background:var(--gold); }
+  .stat-card.green::before { background:var(--green); }
+  .stat-card.blue::before { background:#2ab3c8; }
+  .stat-label { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .stat-val { font-family:'Cormorant Garamond',serif; font-size:38px; font-weight:400; line-height:1; }
+  .stat-val.red { color:var(--red); }
+  .stat-val.gold { color:var(--gold); }
+  .stat-val.green { color:var(--green); }
+  .stat-val.blue { color:#2ab3c8; }
+  .stat-sub { font-size:10px; color:var(--muted); margin-top:8px; }
+
+  /* ── SECTION ── */
+  .section-card {
+    background:var(--bg2); border:1px solid var(--border); margin-bottom:20px;
+  }
+  .section-card-head {
+    padding:20px 24px; border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .section-card-title { font-size:11px; letter-spacing:2px; text-transform:uppercase; }
+  .section-card-body { padding:24px; }
+
+  /* ── DOLULUK SLIDERS ── */
+  .dol-row { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .dol-control label {
+    font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted);
+    display:block; margin-bottom:12px;
+  }
+  .dol-control .dol-val-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .dol-pct-display { font-family:'Cormorant Garamond',serif; font-size:42px; line-height:1; }
+  .dol-pct-display.r { color:var(--red); }
+  .dol-pct-display.p { color:var(--gold); }
+  input[type=range] {
+    width:100%; -webkit-appearance:none; appearance:none;
+    height:4px; border-radius:2px; outline:none; cursor:pointer;
+    margin-bottom:12px;
+  }
+  input[type=range].r { background:linear-gradient(90deg, var(--red-dark), var(--red)); }
+  input[type=range].p { background:linear-gradient(90deg, #1a6e7e, var(--gold)); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:var(--white); border:2px solid rgba(255,255,255,0.3);
+    box-shadow:0 2px 8px rgba(0,0,0,0.4);
+  }
+  .dol-status-badge {
+    display:inline-block; padding:5px 12px; font-size:9px; letter-spacing:1.5px;
+    text-transform:uppercase; border:1px solid;
+  }
+  .dol-save-btn {
+    width:100%; padding:13px; background:var(--red); color:var(--white);
+    font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    border:none; cursor:pointer; transition:background 0.2s; margin-top:16px;
+  }
+  .dol-save-btn:hover { background:var(--red-dark); }
+  .dol-saved { font-size:10px; color:var(--green); letter-spacing:1px; text-align:center; margin-top:10px; display:none; }
+
+  /* ── REZERVASYONLAR TABLE ── */
+  .rezv-filters { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+  .filter-btn {
+    padding:7px 16px; font-size:9px; letter-spacing:2px; text-transform:uppercase;
+    background:transparent; border:1px solid var(--border); color:var(--muted);
+    cursor:pointer; transition:all 0.2s;
+  }
+  .filter-btn.active { background:var(--red); border-color:var(--red); color:var(--white); }
+  .filter-btn:hover:not(.active) { border-color:rgba(255,255,255,0.3); color:var(--white); }
+  table { width:100%; border-collapse:collapse; }
+  thead th {
+    font-size:8px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted);
+    padding:10px 14px; text-align:left; border-bottom:1px solid var(--border);
+  }
+  tbody tr { border-bottom:1px solid rgba(201,149,42,0.06); transition:background 0.15s; }
+  tbody tr:hover { background:rgba(255,255,255,0.025); }
+  tbody td { padding:13px 14px; font-size:12px; color:rgba(255,248,239,0.75); }
+  .badge {
+    display:inline-block; padding:3px 10px; font-size:8px; letter-spacing:1.5px;
+    text-transform:uppercase; border-radius:0;
+  }
+  .badge-pending { background:rgba(224,122,58,0.15); color:var(--orange); border:1px solid rgba(224,122,58,0.3); }
+  .badge-confirmed { background:rgba(61,186,110,0.12); color:var(--green); border:1px solid rgba(61,186,110,0.25); }
+  .badge-cancelled { background:rgba(200,16,46,0.12); color:var(--red); border:1px solid rgba(200,16,46,0.2); }
+  .badge-restoran { background:rgba(200,16,46,0.1); color:var(--red); border:1px solid rgba(200,16,46,0.2); }
+  .badge-plaj { background:rgba(42,179,200,0.1); color:#2ab3c8; border:1px solid rgba(42,179,200,0.2); }
+  .action-btn {
+    background:none; border:1px solid var(--border); color:var(--muted);
+    font-size:9px; letter-spacing:1px; text-transform:uppercase;
+    padding:5px 10px; cursor:pointer; transition:all 0.2s; margin-right:4px;
+  }
+  .action-btn:hover { border-color:rgba(255,255,255,0.3); color:var(--white); }
+  .action-btn.confirm { border-color:rgba(61,186,110,0.3); color:var(--green); }
+  .action-btn.confirm:hover { background:rgba(61,186,110,0.12); }
+  .action-btn.cancel { border-color:rgba(200,16,46,0.3); color:var(--red); }
+  .action-btn.cancel:hover { background:rgba(200,16,46,0.08); }
+  .empty-state { text-align:center; padding:48px; color:var(--muted); font-size:12px; letter-spacing:1px; }
+
+  /* ── FORM ── */
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .fg { margin-bottom:16px; }
+  .fg label { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+  .fg input, .fg select, .fg textarea {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    color:var(--white); padding:11px 14px; font-family:'Montserrat',sans-serif; font-size:12px;
+    outline:none; transition:border-color 0.2s;
+  }
+  .fg select option { background:#221a0e; }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { border-color:var(--gold); }
+  .fg textarea { resize:vertical; min-height:80px; }
+  .add-btn {
+    padding:12px 28px; background:var(--red); color:var(--white);
+    font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+    border:none; cursor:pointer; transition:background 0.2s;
+  }
+  .add-btn:hover { background:var(--red-dark); }
+
+  /* ── MENU YÖNETIMI ── */
+  .menu-mgmt-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .menu-cat-title {
+    font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--red);
+    margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border);
+  }
+  .menu-item-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid rgba(201,149,42,0.06);
+  }
+  .menu-item-row:last-child { border-bottom:none; }
+  .mi-name { font-size:13px; font-family:'Cormorant Garamond',serif; }
+  .mi-price { font-size:12px; color:var(--red); }
+  .mi-del { background:none; border:none; color:rgba(200,16,46,0.4); font-size:16px; cursor:pointer; transition:color 0.2s; padding:0 4px; }
+  .mi-del:hover { color:var(--red); }
+
+  /* ── TOAST ── */
+  #toast {
+    position:fixed; bottom:28px; right:28px;
+    background:var(--bg3); border:1px solid var(--green); color:var(--green);
+    font-size:10px; letter-spacing:2px; text-transform:uppercase;
+    padding:12px 20px; z-index:9999; opacity:0;
+    transition:opacity 0.3s; pointer-events:none;
+  }
+  #toast.show { opacity:1; }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px) {
+    .sidebar { width:60px; }
+    .sidebar-logo-text, .sidebar-logo-sub, .nav-btn span:not(.icon), .nav-group-label, .sidebar-footer { display:none; }
+    .main { margin-left:60px; padding:24px 16px; }
+    .stats-row { grid-template-columns:1fr 1fr; }
+    .dol-row, .form-grid, .menu-mgmt-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="uploads/q beacgh logo.png" alt="Q Beach Side">
+      <div>
+        <div class="login-logo-text">Q Beach Side</div>
+        <div class="login-logo-sub">Admin Girişi</div>
+      </div>
+    </div>
+    <label class="login-label">Kullanıcı Adı</label>
+    <input class="login-input" type="text" id="loginUser" placeholder="admin" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="login-label">Şifre</label>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Giriş Yap</button>
+    <div class="login-err" id="loginErr">Kullanıcı adı veya şifre hatalı.</div>
+    <div style="margin-top:20px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:center;">Demo: admin / qbeach2024</div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="uploads/q beacgh logo.png" alt="Q">
+      <div>
+        <div class="sidebar-logo-text">Q Beach Side</div>
+        <div class="sidebar-logo-sub">Admin</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Genel</div>
+      <button class="nav-btn active" onclick="showTab('dashboard',this)"><span class="icon">◈</span><span>Dashboard</span></button>
+      <button class="nav-btn" onclick="showTab('rezervasyonlar',this)"><span class="icon">📋</span><span>Rezervasyonlar</span></button>
+      <div class="nav-group-label">Yönetim</div>
+      <button class="nav-btn" onclick="showTab('doluluk',this)"><span class="icon">📊</span><span>Doluluk</span></button>
+      <button class="nav-btn" onclick="showTab('menu',this)"><span class="icon">🍽</span><span>Menü</span></button>
+      <div class="nav-group-label">Diğer</div>
+      <button class="nav-btn" onclick="window.open('Q Beach Side.html','_blank')"><span class="icon">↗</span><span>Siteye Git</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <span>v1.0</span>
+      <button class="logout-btn" onclick="doLogout()">Çıkış</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">Günlük Özet</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div>Canlı</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card red">
+          <div class="stat-label">Bugünkü Rezervasyonlar</div>
+          <div class="stat-val red" id="dashTodayCount">0</div>
+          <div class="stat-sub">bekleyen dahil</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-label">Onay Bekleyen</div>
+          <div class="stat-val gold" id="dashPendingCount">0</div>
+          <div class="stat-sub">hızla yanıt verin</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Restoran Doluluk</div>
+          <div class="stat-val green" id="dashRDol">—</div>
+          <div class="stat-sub">şu an</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Plaj Doluluk</div>
+          <div class="stat-val blue" id="dashPDol">—</div>
+          <div class="stat-sub">şu an</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Son Rezervasyonlar</div>
+          <button class="action-btn" onclick="showTab('rezervasyonlar',null)">Tümünü Gör</button>
+        </div>
+        <div class="section-card-body" style="padding:0;">
+          <table>
+            <thead><tr>
+              <th>Ad Soyad</th><th>Tarih / Saat</th><th>Alan</th><th>Kişi</th><th>Durum</th><th></th>
+            </tr></thead>
+            <tbody id="dashRezvTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REZERVASYONLAR -->
+    <div class="tab-panel" id="tab-rezervasyonlar">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Rezervasyonlar</div>
+          <div class="page-sub">Tüm Talepler</div>
+        </div>
+        <button class="add-btn" onclick="showAddRezv()">+ Yeni Ekle</button>
+      </div>
+
+      <div class="section-card" id="addRezvCard" style="display:none;margin-bottom:20px;">
+        <div class="section-card-head">
+          <div class="section-card-title">Yeni Rezervasyon</div>
+          <button class="action-btn" onclick="document.getElementById('addRezvCard').style.display='none'">İptal</button>
+        </div>
+        <div class="section-card-body">
+          <div class="form-grid">
+            <div class="fg"><label>Ad Soyad</label><input type="text" id="nrName" placeholder="Ad Soyad"></div>
+            <div class="fg"><label>Telefon</label><input type="tel" id="nrPhone" placeholder="+90 5xx xxx xx xx"></div>
+            <div class="fg"><label>Tarih</label><input type="date" id="nrDate"></div>
+            <div class="fg"><label>Saat</label><input type="time" id="nrTime"></div>
+            <div class="fg"><label>Alan</label>
+              <select id="nrType"><option value="restoran">Restoran</option><option value="plaj">Plaj Alanı</option></select>
+            </div>
+            <div class="fg"><label>Kişi Sayısı</label>
+              <select id="nrGuests"><option>1</option><option>2</option><option selected>4</option><option>6</option><option>8</option><option>10+</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>Notlar</label><textarea id="nrNotes" placeholder="Özel istek, alerji…"></textarea></div>
+          <button class="add-btn" onclick="addRezv()">Rezervasyon Ekle</button>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Rezervasyon Listesi</div>
+          <div class="rezv-filters" style="margin:0;">
+            <button class="filter-btn active" onclick="filterRezv('all',this)">Tümü</button>
+            <button class="filter-btn" onclick="filterRezv('pending',this)">Bekleyen</button>
+            <button class="filter-btn" onclick="filterRezv('confirmed',this)">Onaylı</button>
+            <button class="filter-btn" onclick="filterRezv('restoran',this)">Restoran</button>
+            <button class="filter-btn" onclick="filterRezv('plaj',this)">Plaj</button>
+          </div>
+        </div>
+        <div class="section-card-body" style="padding:0;">
+          <table>
+            <thead><tr>
+              <th>Ad Soyad</th><th>Telefon</th><th>Tarih / Saat</th><th>Alan</th><th>Kişi</th><th>Durum</th><th>Not</th><th></th>
+            </tr></thead>
+            <tbody id="rezvTable"></tbody>
+          </table>
+          <div id="rezvEmpty" class="empty-state" style="display:none;">Henüz rezervasyon yok.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOLULUK -->
+    <div class="tab-panel" id="tab-doluluk">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Doluluk Yönetimi</div>
+          <div class="page-sub">Anlık Doluluk Oranlarını Düzenle</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div>Canlı Yayın</div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head"><div class="section-card-title">Doluluk Oranları</div></div>
+        <div class="section-card-body">
+          <div class="dol-row">
+            <div class="dol-control">
+              <label>Restoran Doluluk</label>
+              <div class="dol-val-row">
+                <div class="dol-pct-display r" id="rSliderVal">75%</div>
+                <div class="dol-status-badge" id="rStatusBadge" style="color:var(--red);border-color:rgba(200,16,46,0.3);">Masa Mevcut</div>
+              </div>
+              <input type="range" class="r" id="rSlider" min="0" max="100" value="75" oninput="updateSlider('r',this.value)">
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);letter-spacing:1px;">
+                <span>0 / 38 masa</span>
+                <span id="rMasaSay">29 / 38 masa</span>
+              </div>
+            </div>
+            <div class="dol-control">
+              <label>Plaj Alanı Doluluk</label>
+              <div class="dol-val-row">
+                <div class="dol-pct-display p" id="pSliderVal">50%</div>
+                <div class="dol-status-badge" id="pStatusBadge" style="color:var(--gold);border-color:rgba(201,149,42,0.3);">Şezlong Mevcut</div>
+              </div>
+              <input type="range" class="p" id="pSlider" min="0" max="100" value="50" oninput="updateSlider('p',this.value)">
+              <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);letter-spacing:1px;">
+                <span>0 / 60 şezlong</span>
+                <span id="pSezSay">30 / 60 şezlong</span>
+              </div>
+            </div>
+          </div>
+          <button class="dol-save-btn" onclick="saveDoluluk()">Siteye Yayınla</button>
+          <div class="dol-saved" id="dolSaved">✓ Site güncellendi</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head"><div class="section-card-title">Hızlı Durum</div></div>
+        <div class="section-card-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <button class="filter-btn" onclick="quickSet(30,20)" style="padding:14px;font-size:9px;">🟢 Sakin<br><span style="opacity:0.5">R:30% P:20%</span></button>
+            <button class="filter-btn" onclick="quickSet(65,50)" style="padding:14px;font-size:9px;">🟡 Orta Yoğun<br><span style="opacity:0.5">R:65% P:50%</span></button>
+            <button class="filter-btn" onclick="quickSet(90,85)" style="padding:14px;font-size:9px;">🔴 Dolu Dolu<br><span style="opacity:0.5">R:90% P:85%</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENÜ -->
+    <div class="tab-panel" id="tab-menu">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Menü Yönetimi</div>
+          <div class="page-sub">Yemek ve Fiyat Düzenle</div>
+        </div>
+      </div>
+
+      <div class="section-card" style="margin-bottom:20px;">
+        <div class="section-card-head"><div class="section-card-title">Yeni Ürün Ekle</div></div>
+        <div class="section-card-body">
+          <div class="form-grid">
+            <div class="fg"><label>Ürün Adı</label><input type="text" id="miName" placeholder="Ürün adı"></div>
+            <div class="fg"><label>Fiyat (₺)</label><input type="number" id="miPrice" placeholder="0"></div>
+            <div class="fg"><label>Kategori</label>
+              <select id="miCat">
+                <option value="starters">Başlangıçlar</option>
+                <option value="seafood">Deniz Ürünleri</option>
+                <option value="main">Et & Izgara</option>
+                <option value="cocktails">Kokteyller</option>
+                <option value="desserts">Tatlılar</option>
+              </select>
+            </div>
+            <div class="fg"><label>Etiket</label><input type="text" id="miTag" placeholder="Şef Önerisi, Vegan…"></div>
+          </div>
+          <div class="fg"><label>Açıklama</label><textarea id="miDesc" placeholder="Malzemeler, pişirme yöntemi…"></textarea></div>
+          <button class="add-btn" onclick="addMenuItem()">Ekle</button>
+        </div>
+      </div>
+
+      <div class="menu-mgmt-grid" id="menuMgmtGrid"></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast">✓ İşlem tamamlandı</div>
+
+<script>
+// ── AUTH ─────────────────────────────────────────────
+const CREDS = { admin: 'qbeach2024' };
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (CREDS[u] && CREDS[u] === p) {
+    sessionStorage.setItem('qbs_admin', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('qbs_admin');
+  location.reload();
+}
+
+if (sessionStorage.getItem('qbs_admin')) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// ── DATA ─────────────────────────────────────────────
+let reservations = JSON.parse(localStorage.getItem('qbs_rezervasyonlar') || '[]');
+let menuData = JSON.parse(localStorage.getItem('qbs_menu') || 'null') || {
+  starters: [
+    { name: 'Avokado Salatası', price: 280, desc: 'Taze avokado, cherry domates, rokola', tag: 'Vegan' },
+    { name: 'Sığır Carpaccio', price: 420, desc: 'İnce dilim dana bonfile, parmesan', tag: 'Şef Önerisi' },
+    { name: 'Karides Tava', price: 380, desc: 'Sarımsaklı tereyağ, cherry domates', tag: '' },
+    { name: 'Kalamar Tava', price: 320, desc: 'Çıtır kalamar, limon sosu', tag: 'Popüler' },
+  ],
+  seafood: [
+    { name: 'Avokadolu Somon', price: 520, desc: 'Pan-seared somon, avokado salsa', tag: 'Şef Önerisi' },
+    { name: 'Levrek Izgara', price: 440, desc: 'Taze levrek, limon-dereotu', tag: '' },
+    { name: 'Surf & Turf', price: 780, desc: 'Bonfile ve ıstakoz kuyruğu', tag: 'Premium' },
+  ],
+  main: [
+    { name: 'Gorgonzola Steak', price: 720, desc: '250gr ribeye, gorgonzola sosu', tag: 'Şef Önerisi' },
+    { name: 'Lokum Bonfile', price: 650, desc: '200gr dana bonfile, mantar sosu', tag: 'Premium' },
+    { name: 'Kuzu Pirzola', price: 580, desc: 'Kekikli kuzu, taze nane sosu', tag: 'Popüler' },
+  ],
+  cocktails: [
+    { name: 'Q Signature', price: 240, desc: 'Tequila, mango, jalapeño', tag: 'İmza İçki' },
+    { name: 'Sunset Spritz', price: 220, desc: 'Aperol, prosecco, portakal', tag: 'Popüler' },
+    { name: 'Beach Mojito', price: 200, desc: 'Beyaz rom, limon, nane', tag: '' },
+  ],
+  desserts: [
+    { name: 'Limon Tart', price: 180, desc: 'Taze limon kreması, merengi', tag: 'Hafif' },
+    { name: 'Çikolatalı Lav Kek', price: 200, desc: 'Fondant, vanilyalı dondurma', tag: 'Popüler' },
+    { name: 'Tiramisu', price: 175, desc: 'Mascarpone, espresso, kakao', tag: '' },
+  ]
+};
+
+function saveData() {
+  localStorage.setItem('qbs_rezervasyonlar', JSON.stringify(reservations));
+  localStorage.setItem('qbs_menu', JSON.stringify(menuData));
+}
+
+// ── TABS ─────────────────────────────────────────────
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'rezervasyonlar') renderRezv('all');
+  if (tab === 'doluluk') loadDoluluk();
+  if (tab === 'menu') renderMenu();
+}
+
+// ── TOAST ─────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── DASHBOARD ─────────────────────────────────────────
+function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayList = reservations.filter(r => r.date === today);
+  const pending = reservations.filter(r => r.status === 'pending');
+  document.getElementById('dashTodayCount').textContent = todayList.length;
+  document.getElementById('dashPendingCount').textContent = pending.length;
+  const dol = JSON.parse(localStorage.getItem('qbs_doluluk') || '{}');
+  document.getElementById('dashRDol').textContent = (dol.restoran || '—') + (dol.restoran ? '%' : '');
+  document.getElementById('dashPDol').textContent = (dol.plaj || '—') + (dol.plaj ? '%' : '');
+
+  const recent = [...reservations].reverse().slice(0, 6);
+  const tbody = document.getElementById('dashRezvTable');
+  tbody.innerHTML = recent.length ? recent.map(r => rezvRow(r, true)).join('') : '<tr><td colspan="6" class="empty-state">Henüz rezervasyon yok.</td></tr>';
+}
+
+// ── REZERVASYONLAR ────────────────────────────────────
+let currentFilter = 'all';
+
+function rezvRow(r, short) {
+  const statusMap = { pending:'badge-pending', confirmed:'badge-confirmed', cancelled:'badge-cancelled' };
+  const statusLabel = { pending:'Bekleyen', confirmed:'Onaylı', cancelled:'İptal' };
+  const typeLabel = r.type === 'plaj' ? '<span class="badge badge-plaj">Plaj</span>' : '<span class="badge badge-restoran">Restoran</span>';
+  const actions = short ? `<td><button class="action-btn" onclick="showTab('rezervasyonlar',null)">Detay</button></td>` :
+    `<td>
+      ${r.status === 'pending' ? `<button class="action-btn confirm" onclick="setStatus('${r.id}','confirmed')">Onayla</button>` : ''}
+      ${r.status !== 'cancelled' ? `<button class="action-btn cancel" onclick="setStatus('${r.id}','cancelled')">İptal</button>` : ''}
+      <button class="action-btn" onclick="delRezv('${r.id}')" style="color:rgba(200,16,46,0.4);">Sil</button>
+    </td>`;
+  return `<tr>
+    <td style="font-weight:500;color:var(--white)">${r.name}</td>
+    ${!short ? `<td style="color:var(--muted)">${r.phone}</td>` : ''}
+    <td>${r.date} ${r.time}</td>
+    <td>${typeLabel}</td>
+    <td>${r.guests}</td>
+    <td><span class="badge ${statusMap[r.status]}">${statusLabel[r.status]}</span></td>
+    ${!short ? `<td style="font-size:10px;color:var(--muted);max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${r.notes || '—'}</td>` : ''}
+    ${actions}
+  </tr>`;
+}
+
+function renderRezv(filter) {
+  currentFilter = filter;
+  let list = [...reservations].reverse();
+  if (filter === 'pending') list = list.filter(r => r.status === 'pending');
+  if (filter === 'confirmed') list = list.filter(r => r.status === 'confirmed');
+  if (filter === 'restoran') list = list.filter(r => r.type === 'restoran');
+  if (filter === 'plaj') list = list.filter(r => r.type === 'plaj');
+  const tbody = document.getElementById('rezvTable');
+  tbody.innerHTML = list.map(r => rezvRow(r, false)).join('');
+  document.getElementById('rezvEmpty').style.display = list.length ? 'none' : 'block';
+}
+
+function filterRezv(f, btn) {
+  document.querySelectorAll('.rezv-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderRezv(f);
+}
+
+function showAddRezv() {
+  const c = document.getElementById('addRezvCard');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
+}
+
+function addRezv() {
+  const name = document.getElementById('nrName').value.trim();
+  const phone = document.getElementById('nrPhone').value.trim();
+  const date = document.getElementById('nrDate').value;
+  const time = document.getElementById('nrTime').value;
+  if (!name || !date || !time) { alert('Ad, tarih ve saat gerekli.'); return; }
+  const r = {
+    id: Date.now().toString(),
+    name, phone, date, time,
+    type: document.getElementById('nrType').value,
+    guests: document.getElementById('nrGuests').value,
+    notes: document.getElementById('nrNotes').value,
+    status: 'confirmed',
+    createdAt: new Date().toISOString()
+  };
+  reservations.push(r);
+  saveData();
+  document.getElementById('addRezvCard').style.display = 'none';
+  renderRezv(currentFilter);
+  toast('✓ Rezervasyon eklendi');
+}
+
+function setStatus(id, status) {
+  const r = reservations.find(x => x.id === id);
+  if (r) { r.status = status; saveData(); renderRezv(currentFilter); renderDashboard(); }
+  toast(status === 'confirmed' ? '✓ Rezervasyon onaylandı' : '✓ Rezervasyon iptal edildi');
+}
+
+function delRezv(id) {
+  if (!confirm('Rezervasyonu silmek istiyor musunuz?')) return;
+  reservations = reservations.filter(x => x.id !== id);
+  saveData();
+  renderRezv(currentFilter);
+  toast('✓ Silindi');
+}
+
+// ── DOLULUK ───────────────────────────────────────────
+function loadDoluluk() {
+  const saved = JSON.parse(localStorage.getItem('qbs_doluluk') || '{}');
+  const r = saved.restoran || 75;
+  const p = saved.plaj || 50;
+  document.getElementById('rSlider').value = r;
+  document.getElementById('pSlider').value = p;
+  updateSlider('r', r);
+  updateSlider('p', p);
+}
+
+function updateSlider(type, val) {
+  val = parseInt(val);
+  if (type === 'r') {
+    document.getElementById('rSliderVal').textContent = val + '%';
+    document.getElementById('rMasaSay').textContent = Math.round(38 * val / 100) + ' / 38 masa';
+    document.getElementById('rStatusBadge').textContent =
+      val > 85 ? 'Neredeyse Dolu' : val > 60 ? 'Masa Mevcut' : 'Bol Alan';
+  } else {
+    document.getElementById('pSliderVal').textContent = val + '%';
+    document.getElementById('pSezSay').textContent = Math.round(60 * val / 100) + ' / 60 şezlong';
+    document.getElementById('pStatusBadge').textContent =
+      val > 80 ? 'Neredeyse Dolu' : val > 50 ? 'Sınırlı Alan' : 'Geniş Alan';
+  }
+}
+
+function saveDoluluk() {
+  const r = parseInt(document.getElementById('rSlider').value);
+  const p = parseInt(document.getElementById('pSlider').value);
+  localStorage.setItem('qbs_doluluk', JSON.stringify({ restoran: r, plaj: p, ts: Date.now() }));
+  const saved = document.getElementById('dolSaved');
+  saved.style.display = 'block';
+  toast('✓ Doluluk siteye yayınlandı');
+  setTimeout(() => saved.style.display = 'none', 3000);
+  renderDashboard();
+}
+
+function quickSet(r, p) {
+  document.getElementById('rSlider').value = r;
+  document.getElementById('pSlider').value = p;
+  updateSlider('r', r);
+  updateSlider('p', p);
+  saveDoluluk();
+}
+
+// ── MENÜ ─────────────────────────────────────────────
+const catNames = { starters:'Başlangıçlar', seafood:'Deniz Ürünleri', main:'Et & Izgara', cocktails:'Kokteyller', desserts:'Tatlılar' };
+
+function renderMenu() {
+  const grid = document.getElementById('menuMgmtGrid');
+  grid.innerHTML = Object.keys(menuData).map(cat => `
+    <div class="section-card">
+      <div class="section-card-head"><div class="section-card-title">${catNames[cat]}</div></div>
+      <div class="section-card-body">
+        <div id="mcat-${cat}">
+          ${menuData[cat].map((item, i) => `
+            <div class="menu-item-row">
+              <div>
+                <div class="mi-name">${item.name}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">${item.desc}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span class="mi-price">₺${item.price}</span>
+                <button class="mi-del" onclick="delMenuItem('${cat}',${i})">×</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addMenuItem() {
+  const name = document.getElementById('miName').value.trim();
+  const price = parseInt(document.getElementById('miPrice').value);
+  const cat = document.getElementById('miCat').value;
+  const desc = document.getElementById('miDesc').value.trim();
+  const tag = document.getElementById('miTag').value.trim();
+  if (!name || !price) { alert('Ürün adı ve fiyat gerekli.'); return; }
+  menuData[cat].push({ name, price, desc, tag });
+  saveData();
+  renderMenu();
+  document.getElementById('miName').value = '';
+  document.getElementById('miPrice').value = '';
+  document.getElementById('miDesc').value = '';
+  document.getElementById('miTag').value = '';
+  toast('✓ Ürün eklendi');
+}
+
+function delMenuItem(cat, idx) {
+  if (!confirm('Ürünü silmek istiyor musunuz?')) return;
+  menuData[cat].splice(idx, 1);
+  saveData();
+  renderMenu();
+  toast('✓ Ürün silindi');
+}
+
+// ── INIT ─────────────────────────────────────────────
+function initApp() {
+  renderDashboard();
+  document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
+}
+
+if (sessionStorage.getItem('qbs_admin')) initApp();
+</script>
+</body>
+</html>
