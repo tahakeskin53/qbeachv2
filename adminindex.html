@@ -525,22 +525,49 @@
         </div>
       </div>
 
-      <!-- API Anahtarı Girişi -->
-      <div id="apiKeyBanner" class="section-card" style="margin-bottom:20px;border-color:rgba(201,149,42,0.35);">
+      <!-- API Anahtarları -->
+      <div class="section-card" style="margin-bottom:20px;border-color:rgba(201,149,42,0.35);">
         <div class="section-card-head" style="border-color:rgba(201,149,42,0.2);">
-          <div class="section-card-title" style="color:var(--gold);">⚙ Anthropic API Anahtarı</div>
-          <div id="apiKeyStatus" style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Bağlı Değil</div>
+          <div class="section-card-title" style="color:var(--gold);">⚙ Yapay Zeka API Anahtarları</div>
+          <div id="apiKeyStatus" style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);"></div>
         </div>
-        <div class="section-card-body" style="display:flex;gap:12px;align-items:flex-end;">
-          <div class="fg" style="flex:1;margin:0;">
-            <label>API Key (sk-ant-…)</label>
-            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" style="font-family:monospace;letter-spacing:1px;">
+        <div class="section-card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <!-- Claude -->
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div class="fg" style="flex:1;margin:0;">
+              <label>Claude API Key (sk-ant-…)</label>
+              <input type="password" id="apiKeyClaude" placeholder="sk-ant-api03-…" style="font-family:monospace;letter-spacing:1px;">
+            </div>
+            <button class="add-btn" onclick="saveAiKey('claude')" style="margin-bottom:0;white-space:nowrap;background:#5436DA;">Kaydet</button>
+            <button class="action-btn cancel" onclick="clearAiKey('claude')" style="padding:11px 14px;">Sil</button>
           </div>
-          <button class="add-btn" onclick="saveApiKey()" style="margin-bottom:0;white-space:nowrap;">Kaydet</button>
-          <button class="action-btn cancel" onclick="clearApiKey()" style="padding:11px 14px;">Sil</button>
-        </div>
-        <div style="padding:0 24px 16px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">
-          API anahtarınızı <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);text-decoration:none;">console.anthropic.com</a> adresinden alabilirsiniz. Anahtar bu tarayıcıda şifreli olarak saklanır.
+          <div id="claudeKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
+            · <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);text-decoration:none;">console.anthropic.com</a> adresinden alın
+          </div>
+          <!-- ChatGPT -->
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div class="fg" style="flex:1;margin:0;">
+              <label>ChatGPT API Key (sk-proj-…)</label>
+              <input type="password" id="apiKeyChatgpt" placeholder="sk-proj-…" style="font-family:monospace;letter-spacing:1px;">
+            </div>
+            <button class="add-btn" onclick="saveAiKey('chatgpt')" style="margin-bottom:0;white-space:nowrap;background:#10a37f;">Kaydet</button>
+            <button class="action-btn cancel" onclick="clearAiKey('chatgpt')" style="padding:11px 14px;">Sil</button>
+          </div>
+          <div id="chatgptKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
+            · <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--gold);text-decoration:none;">platform.openai.com</a> adresinden alın
+          </div>
+          <!-- Gemini -->
+          <div style="display:flex;gap:10px;align-items:flex-end;">
+            <div class="fg" style="flex:1;margin:0;">
+              <label>Gemini API Key (AIza…)</label>
+              <input type="password" id="apiKeyGemini" placeholder="AIzaSy…" style="font-family:monospace;letter-spacing:1px;">
+            </div>
+            <button class="add-btn" onclick="saveAiKey('gemini')" style="margin-bottom:0;white-space:nowrap;background:#1a73e8;">Kaydet</button>
+            <button class="action-btn cancel" onclick="clearAiKey('gemini')" style="padding:11px 14px;">Sil</button>
+          </div>
+          <div id="geminiKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
+            · <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--gold);text-decoration:none;">aistudio.google.com</a> adresinden alın (ücretsiz)
+          </div>
         </div>
       </div>
 
@@ -550,6 +577,14 @@
           <div class="section-card">
             <div class="section-card-head"><div class="section-card-title">Post Oluştur</div></div>
             <div class="section-card-body">
+              <div class="fg">
+                <label>Yapay Zeka Modeli</label>
+                <select id="ai-model">
+                  <option value="claude">Claude (Anthropic)</option>
+                  <option value="chatgpt">ChatGPT (OpenAI)</option>
+                  <option value="gemini">Gemini (Google)</option>
+                </select>
+              </div>
               <div class="fg">
                 <label>Platform</label>
                 <select id="ai-platform">
@@ -786,40 +821,7 @@ if (sessionStorage.getItem('qbs_admin')) {
 }
 
 // ── DATA ─────────────────────────────────────────────
-let reservations = JSON.parse(localStorage.getItem('qbs_rezervasyonlar') || '[]');
-let menuData = JSON.parse(localStorage.getItem('qbs_menu') || 'null') || {
-  starters: [
-    { name: 'Avokado Salatası', price: 280, desc: 'Taze avokado, cherry domates, rokola', tag: 'Vegan' },
-    { name: 'Sığır Carpaccio', price: 420, desc: 'İnce dilim dana bonfile, parmesan', tag: 'Şef Önerisi' },
-    { name: 'Karides Tava', price: 380, desc: 'Sarımsaklı tereyağ, cherry domates', tag: '' },
-    { name: 'Kalamar Tava', price: 320, desc: 'Çıtır kalamar, limon sosu', tag: 'Popüler' },
-  ],
-  seafood: [
-    { name: 'Avokadolu Somon', price: 520, desc: 'Pan-seared somon, avokado salsa', tag: 'Şef Önerisi' },
-    { name: 'Levrek Izgara', price: 440, desc: 'Taze levrek, limon-dereotu', tag: '' },
-    { name: 'Surf & Turf', price: 780, desc: 'Bonfile ve ıstakoz kuyruğu', tag: 'Premium' },
-  ],
-  main: [
-    { name: 'Gorgonzola Steak', price: 720, desc: '250gr ribeye, gorgonzola sosu', tag: 'Şef Önerisi' },
-    { name: 'Lokum Bonfile', price: 650, desc: '200gr dana bonfile, mantar sosu', tag: 'Premium' },
-    { name: 'Kuzu Pirzola', price: 580, desc: 'Kekikli kuzu, taze nane sosu', tag: 'Popüler' },
-  ],
-  cocktails: [
-    { name: 'Q Signature', price: 240, desc: 'Tequila, mango, jalapeño', tag: 'İmza İçki' },
-    { name: 'Sunset Spritz', price: 220, desc: 'Aperol, prosecco, portakal', tag: 'Popüler' },
-    { name: 'Beach Mojito', price: 200, desc: 'Beyaz rom, limon, nane', tag: '' },
-  ],
-  desserts: [
-    { name: 'Limon Tart', price: 180, desc: 'Taze limon kreması, merengi', tag: 'Hafif' },
-    { name: 'Çikolatalı Lav Kek', price: 200, desc: 'Fondant, vanilyalı dondurma', tag: 'Popüler' },
-    { name: 'Tiramisu', price: 175, desc: 'Mascarpone, espresso, kakao', tag: '' },
-  ]
-};
-
-function saveData() {
-  localStorage.setItem('qbs_rezervasyonlar', JSON.stringify(reservations));
-  localStorage.setItem('qbs_menu', JSON.stringify(menuData));
-}
+// Veriler artık Supabase'den geliyor
 
 // ── TABS ─────────────────────────────────────────────
 function showTab(tab, btn) {
@@ -830,6 +832,7 @@ function showTab(tab, btn) {
   if (tab === 'dashboard') renderDashboard();
   if (tab === 'rezervasyonlar') renderRezv('all');
   if (tab === 'doluluk') loadDoluluk();
+  if (tab === 'menu') renderMenu();
   if (tab === 'posts') renderPublishedPosts();
 }
 
@@ -998,41 +1001,70 @@ function quickSet(r, p) {
 
 // ── MENÜ ─────────────────────────────────────────────
 const catNames = { starters:'Başlangıçlar', seafood:'Deniz Ürünleri', main:'Et & Izgara', cocktails:'Kokteyller', desserts:'Tatlılar' };
+const catIds = { starters:1, seafood:2, main:3, cocktails:4, desserts:5 };
+const catIdToKey = { 1:'starters', 2:'seafood', 3:'main', 4:'cocktails', 5:'desserts' };
 
-function renderMenu() {
+async function renderMenu() {
   const grid = document.getElementById('menuMgmtGrid');
-  grid.innerHTML = Object.keys(menuData).map(cat => `
+  grid.innerHTML = '<div style="padding:24px;color:var(--muted)">Yükleniyor...</div>';
+
+  // Kategorileri oluştur
+  await ensureCategories();
+
+  const urunler = await sb.query('urun', 'select=*,menu_kategori(kategori_adi)&order=urun_id.asc');
+  if (!Array.isArray(urunler)) return;
+
+  grid.innerHTML = Object.keys(catNames).map(cat => {
+    const catId = catIds[cat];
+    const items = urunler.filter(u => u.kategori_id === catId);
+    return `
     <div class="section-card">
       <div class="section-card-head"><div class="section-card-title">${catNames[cat]}</div></div>
       <div class="section-card-body">
         <div id="mcat-${cat}">
-          ${menuData[cat].map((item, i) => `
+          ${items.length ? items.map(item => `
             <div class="menu-item-row">
               <div>
-                <div class="mi-name">${item.name}</div>
-                <div style="font-size:10px;color:var(--muted);margin-top:2px">${item.desc}</div>
+                <div class="mi-name">${item.urun_adi}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:2px">${item.aciklama || ''}</div>
               </div>
               <div style="display:flex;align-items:center;gap:12px">
-                <span class="mi-price">₺${item.price}</span>
-                <button class="mi-del" onclick="delMenuItem('${cat}',${i})">×</button>
+                <span class="mi-price">₺${item.fiyat}</span>
+                <button class="mi-del" onclick="delMenuItem(${item.urun_id})">×</button>
               </div>
             </div>
-          `).join('')}
+          `).join('') : '<div style="font-size:11px;color:var(--muted);padding:8px 0">Henüz ürün yok.</div>'}
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-function addMenuItem() {
+async function ensureCategories() {
+  const cats = await sb.query('menu_kategori', 'select=kategori_id,kategori_adi');
+  if (Array.isArray(cats) && cats.length >= 5) return;
+  const defaults = [
+    {kategori_id:1, kategori_adi:'Başlangıçlar'},
+    {kategori_id:2, kategori_adi:'Deniz Ürünleri'},
+    {kategori_id:3, kategori_adi:'Et & Izgara'},
+    {kategori_id:4, kategori_adi:'Kokteyller'},
+    {kategori_id:5, kategori_adi:'Tatlılar'},
+  ];
+  for (const c of defaults) {
+    if (!Array.isArray(cats) || !cats.find(x => x.kategori_id === c.kategori_id)) {
+      await sb.insert('menu_kategori', c);
+    }
+  }
+}
+
+async function addMenuItem() {
   const name = document.getElementById('miName').value.trim();
-  const price = parseInt(document.getElementById('miPrice').value);
+  const price = parseFloat(document.getElementById('miPrice').value);
   const cat = document.getElementById('miCat').value;
   const desc = document.getElementById('miDesc').value.trim();
   const tag = document.getElementById('miTag').value.trim();
   if (!name || !price) { alert('Ürün adı ve fiyat gerekli.'); return; }
-  menuData[cat].push({ name, price, desc, tag });
-  saveData();
+  await sb.insert('urun', { urun_adi: name, fiyat: price, kategori_id: catIds[cat], aciklama: desc, etiket: tag, aktif: true });
   renderMenu();
   document.getElementById('miName').value = '';
   document.getElementById('miPrice').value = '';
@@ -1041,77 +1073,101 @@ function addMenuItem() {
   toast('✓ Ürün eklendi');
 }
 
-function delMenuItem(cat, idx) {
+async function delMenuItem(id) {
   if (!confirm('Ürünü silmek istiyor musunuz?')) return;
-  menuData[cat].splice(idx, 1);
-  saveData();
+  await sb.del('urun', `urun_id=eq.${id}`);
   renderMenu();
   toast('✓ Ürün silindi');
 }
 
 // ── ANTHROPIC API BAĞLANTISI ──────────────────────────
-function getApiKey() {
-  return localStorage.getItem('qbs_api_key') || '';
+// ── ÇOKLU AI API YÖNETİMİ ────────────────────────────
+function getApiKey(model) {
+  return localStorage.getItem('qbs_api_key_' + model) || '';
 }
 
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) { alert('Geçerli bir Anthropic API anahtarı girin (sk-ant- ile başlar).'); return; }
-  localStorage.setItem('qbs_api_key', key);
-  document.getElementById('apiKeyInput').value = '';
+function saveAiKey(model) {
+  const inputMap = { claude:'apiKeyClaude', chatgpt:'apiKeyChatgpt', gemini:'apiKeyGemini' };
+  const key = document.getElementById(inputMap[model]).value.trim();
+  if (!key) { alert('API anahtarı boş olamaz.'); return; }
+  localStorage.setItem('qbs_api_key_' + model, key);
+  document.getElementById(inputMap[model]).value = '';
   updateApiKeyUI();
-  toast('✓ API anahtarı kaydedildi');
+  toast('✓ ' + model + ' API anahtarı kaydedildi');
 }
 
-function clearApiKey() {
-  if (!confirm('API anahtarı silinsin mi?')) return;
-  localStorage.removeItem('qbs_api_key');
+function clearAiKey(model) {
+  if (!confirm(model + ' API anahtarı silinsin mi?')) return;
+  localStorage.removeItem('qbs_api_key_' + model);
   updateApiKeyUI();
-  toast('✓ API anahtarı silindi');
+  toast('✓ Silindi');
 }
 
 function updateApiKeyUI() {
-  const key = getApiKey();
-  const status = document.getElementById('apiKeyStatus');
-  const input = document.getElementById('apiKeyInput');
-  if (key) {
-    if (status) { status.textContent = '✓ Bağlı · ' + key.substring(0,12) + '…'; status.style.color = 'var(--green)'; }
-    if (input) input.placeholder = key.substring(0,14) + '… (değiştirmek için yenisini girin)';
-  } else {
-    if (status) { status.textContent = 'Bağlı Değil'; status.style.color = 'var(--muted)'; }
-    if (input) input.placeholder = 'sk-ant-api03-…';
+  const models = ['claude','chatgpt','gemini'];
+  const statusEl = document.getElementById('apiKeyStatus');
+  const connected = models.filter(m => getApiKey(m));
+  if (statusEl) {
+    statusEl.textContent = connected.length ? '✓ Bağlı: ' + connected.join(', ') : 'Hiçbir model bağlı değil';
+    statusEl.style.color = connected.length ? 'var(--green)' : 'var(--muted)';
   }
+  const statusMap = { claude:'claudeKeyStatus', chatgpt:'chatgptKeyStatus', gemini:'geminiKeyStatus' };
+  models.forEach(m => {
+    const el = document.getElementById(statusMap[m]);
+    const key = getApiKey(m);
+    if (el && key) el.innerHTML = `<span style="color:var(--green)">✓ Bağlı · ${key.substring(0,10)}…</span>`;
+  });
 }
 
-async function callClaude(prompt) {
-  const key = getApiKey();
-  if (!key) throw new Error('API_KEY_MISSING');
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${resp.status}`);
+async function callAI(prompt, model) {
+  const key = getApiKey(model);
+  if (!key) throw new Error('API_KEY_MISSING:' + model);
+
+  if (model === 'claude') {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1024, messages:[{role:'user',content:prompt}] })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
+    const data = await resp.json();
+    return data.content[0].text;
   }
-  const data = await resp.json();
-  return data.content[0].text;
+
+  if (model === 'chatgpt') {
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type':'application/json', 'Authorization':'Bearer '+key },
+      body: JSON.stringify({ model:'gpt-4o-mini', max_tokens:1024, messages:[{role:'user',content:prompt}] })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
+    const data = await resp.json();
+    return data.choices[0].message.content;
+  }
+
+  if (model === 'gemini') {
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'content-type':'application/json' },
+      body: JSON.stringify({ contents:[{ parts:[{text:prompt}] }] })
+    });
+    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
+    const data = await resp.json();
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  throw new Error('Bilinmeyen model');
 }
+
+// Geriye dönük uyumluluk
+function callClaude(prompt) { return callAI(prompt, 'claude'); }
 
 // ── POST ÜRETİCİ ─────────────────────────────────────
 async function generatePost() {
-  const key = getApiKey();
-  if (!key) { alert('Önce Anthropic API anahtarınızı girin.'); return; }
+  const model = document.getElementById('ai-model').value;
+  const key = getApiKey(model);
+  const modelNames = { claude:'Claude', chatgpt:'ChatGPT', gemini:'Gemini' };
+  if (!key) { alert(`Önce ${modelNames[model]} API anahtarını girin.`); return; }
 
   const platform = document.getElementById('ai-platform').value;
   const topic = document.getElementById('ai-topic').value;
@@ -1119,19 +1175,22 @@ async function generatePost() {
   const platformNames = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
   const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
 
-  document.getElementById('ai-loading').style.display = 'block';
+  const loadEl = document.getElementById('ai-loading');
+  loadEl.style.display = 'block';
+  loadEl.textContent = `⏳ ${modelNames[model]} ile oluşturuluyor…`;
   document.getElementById('ai-result-card').style.display = 'none';
   document.getElementById('publish-ok').style.display = 'none';
 
   const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\n${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}\n\nPlatforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
 
   try {
-    const text = await callClaude(prompt);
+    const text = await callAI(prompt, model);
     document.getElementById('ai-output').textContent = text;
     document.getElementById('ai-result-card').style.display = 'block';
     document.getElementById('ai-result-card').dataset.platform = platform;
+    document.getElementById('ai-result-card').dataset.model = model;
   } catch(e) {
-    const msg = e.message === 'API_KEY_MISSING' ? 'API anahtarı girilmedi.' : ('Hata: ' + e.message);
+    let msg = e.message.startsWith('API_KEY_MISSING') ? `${modelNames[model]} API anahtarı girilmedi.` : ('Hata: ' + e.message);
     document.getElementById('ai-output').textContent = msg;
     document.getElementById('ai-result-card').style.display = 'block';
   } finally {
@@ -1460,6 +1519,13 @@ function initApp() {
   updateApiKeyUI();
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
 }
+
+// RLS policies için Supabase'de şunları çalıştır:
+// CREATE POLICY "anon_insert_urun" ON urun FOR INSERT TO anon WITH CHECK (true);
+// CREATE POLICY "anon_select_urun" ON urun FOR SELECT TO anon USING (true);
+// CREATE POLICY "anon_delete_urun" ON urun FOR DELETE TO anon USING (true);
+// CREATE POLICY "anon_insert_kategori" ON menu_kategori FOR INSERT TO anon WITH CHECK (true);
+// CREATE POLICY "anon_select_kategori" ON menu_kategori FOR SELECT TO anon USING (true);
 
 // Tab'a geçince ilgili render'ı çalıştır
 const _origShowTab = showTab;
