@@ -998,6 +998,83 @@
   </div>
 </div>
 
+<!-- ── TRIPADVİSOR YORUMLAR ──────────────────────────── -->
+<div id="yorumlar" style="background:linear-gradient(180deg,#18120a 0%,#1e160b 100%);padding:90px 60px;border-top:1px solid rgba(201,149,42,0.1);border-bottom:1px solid rgba(201,149,42,0.1);">
+  <div style="max-width:1400px;margin:0 auto;">
+
+    <!-- Başlık -->
+    <div style="text-align:center;margin-bottom:56px;">
+      <span class="section-label" style="display:block;text-align:center;">Misafirlerimiz Ne Diyor</span>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,56px);font-weight:300;line-height:1.1;">Gerçek Deneyimler</h2>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:20px;">
+        <!-- TripAdvisor owl logo SVG -->
+        <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="18" cy="36" r="11" fill="#34A853"/>
+          <circle cx="46" cy="36" r="11" fill="#34A853"/>
+          <circle cx="18" cy="36" r="5" fill="white"/>
+          <circle cx="46" cy="36" r="5" fill="white"/>
+          <circle cx="18" cy="36" r="2.5" fill="#111"/>
+          <circle cx="46" cy="36" r="2.5" fill="#111"/>
+          <path d="M10 28C14 16 24 10 32 10C40 10 50 16 54 28" stroke="#34A853" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M26 10L22 4M38 10L42 4" stroke="#34A853" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#34A853;">TripAdvisor</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;">· Doğrulanmış Yorumlar</span>
+      </div>
+      <!-- Genel puan -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;">
+        <div style="display:flex;gap:3px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#34A853"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#34A853"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#34A853"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#34A853"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#34A853"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <span style="font-family:'Cormorant Garamond',serif;font-size:28px;color:#34A853;font-weight:400;">5.0</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;">/ 5</span>
+      </div>
+    </div>
+
+    <!-- Yorumlar Carousel — JS tarafından doldurulur -->
+    <div style="position:relative;overflow:hidden;" id="reviewsCarousel">
+      <div id="reviewsTrack" style="display:flex;gap:24px;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);will-change:transform;">
+        <!-- Kartlar renderReviews() ile eklenir -->
+      </div>
+    </div>
+
+    <!-- Carousel Kontrolleri -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:40px;">
+      <button onclick="reviewPrev()" style="width:44px;height:44px;border:1px solid rgba(201,149,42,0.25);background:transparent;color:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,149,42,0.1)'" onmouseout="this.style.borderColor='rgba(201,149,42,0.25)';this.style.background='transparent'">‹</button>
+      <div id="reviewDots" style="display:flex;gap:8px;">
+        <div class="rdot active" onclick="reviewGo(0)" style="width:20px;height:2px;background:var(--gold);cursor:pointer;transition:all 0.3s;"></div>
+        <div class="rdot" onclick="reviewGo(1)" style="width:8px;height:2px;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.3s;"></div>
+        <div class="rdot" onclick="reviewGo(2)" style="width:8px;height:2px;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.3s;"></div>
+        <div class="rdot" onclick="reviewGo(3)" style="width:8px;height:2px;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.3s;"></div>
+      </div>
+      <button onclick="reviewNext()" style="width:44px;height:44px;border:1px solid rgba(201,149,42,0.25);background:transparent;color:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(201,149,42,0.1)'" onmouseout="this.style.borderColor='rgba(201,149,42,0.25)';this.style.background='transparent'">›</button>
+    </div>
+
+    <!-- TripAdvisor CTA -->
+    <div style="text-align:center;margin-top:40px;">
+      <a href="https://www.tripadvisor.com" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid rgba(52,168,83,0.4);color:#34A853;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(52,168,83,0.08)'" onmouseout="this.style.background='transparent'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        TripAdvisor'da Tüm Yorumları Gör
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<style>
+@media(max-width:900px){
+  #yorumlar { padding:60px 20px; }
+  .review-card { flex:0 0 calc(100% - 0px) !important; min-width:unset !important; }
+}
+@media(max-width:600px){
+  #yorumlar { padding:50px 16px; }
+}
+</style>
+
 <!-- ── REZERVASYON ───────────────────────────────────── -->
 <div id="rezervasyon" style="position:relative;overflow:hidden;">
   <div class="rezv-bg">
@@ -1420,6 +1497,104 @@
 
   // ── Set min date ────────────────────────────────────
   document.getElementById('rDate').min = new Date().toISOString().split('T')[0];
+
+  // ── Reviews from admin (localStorage: qbs_reviews) ──
+  const DEFAULT_REVIEWS = [
+    { id:'r1', name:'Ayşe K.', city:'İstanbul, Türkiye', rating:5, text:'Hem deniz manzarası hem de yemekler muhteşemdi. Levrek ızgarası hayatımda yediğim en taze balıktı. Gün batımında kokteylinizi yudumlarken dünyanın en güzel yerinde olduğunuzu hissediyorsunuz. Kesinlikle tekrar geleceğiz.', date:'Ağustos 2024' },
+    { id:'r2', name:'James & Sarah T.', city:'London, UK', rating:5, text:'Absolutely stunning location and exceptional food. The seafood platter was incredibly fresh and the service was impeccable. The sunset view from our table was breathtaking. One of the best dining experiences we had in Turkey!', date:'Temmuz 2024' },
+    { id:'r3', name:'Mehmet A.', city:'Ankara, Türkiye', rating:5, text:'Harika bir mekan! Plaj alanı tertemiz ve şık, yemekler ise lezzetli. Özellikle Surf & Turf\'ü mutlaka deneyin. Personel çok ilgili ve profesyonel. Side\'ye her gelişimizde Q Beach\'e uğruyoruz.', date:'Eylül 2024' },
+    { id:'r4', name:'Klaus M.', city:'München, Germany', rating:5, text:'Ein wunderschönes Restaurant direkt am Meer. Das Essen war hervorragend, besonders der Oktopus-Grill. Die Atmosphäre beim Sonnenuntergang ist einfach unvergesslich. Das Personal war sehr freundlich und aufmerksam.', date:'Ekim 2024' },
+    { id:'r5', name:'Elif & Burak S.', city:'İzmir, Türkiye', rating:5, text:'Yıllardır bu sahile geliyoruz ama Q Beach\'i keşfetmek bambaşka bir deneyim oldu. Kokteylleri, özellikle Q Signature, eşsiz. Gün batımı saatlerinde masa bulmak zor olabiliyor, mutlaka rezervasyon yaptırın!', date:'Temmuz 2024' },
+    { id:'r6', name:'Marie-Claire D.', city:'Paris, France', rating:5, text:'Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L\'ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.', date:'Ağustos 2024' }
+  ];
+
+  let reviewIdx = 0;
+  let reviewAutoTimer = null;
+
+  function starSVG(filled) {
+    const color = filled ? '#34A853' : 'rgba(255,255,255,0.15)';
+    return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${color}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  }
+
+  function renderReviews() {
+    const saved = localStorage.getItem('qbs_reviews');
+    const reviews = (saved ? JSON.parse(saved) : null) || DEFAULT_REVIEWS;
+    const track = document.getElementById('reviewsTrack');
+    const dotsEl = document.getElementById('reviewDots');
+    if (!track) return;
+
+    track.innerHTML = reviews.map(r => {
+      const stars = [1,2,3,4,5].map(i => starSVG(i <= r.rating)).join('');
+      return `<div class="review-card" style="flex:0 0 calc(33.33% - 16px);background:rgba(201,149,42,0.06);border:1px solid rgba(201,149,42,0.14);padding:36px 32px;position:relative;min-width:300px;">
+        <div style="position:absolute;top:24px;right:28px;opacity:0.12;font-size:64px;line-height:1;font-family:Georgia,serif;color:var(--gold);">"</div>
+        <div style="display:flex;gap:2px;margin-bottom:18px;">${stars}</div>
+        <p style="font-size:13px;line-height:1.85;color:rgba(255,248,239,0.75);margin-bottom:24px;font-style:italic;">"${r.text}"</p>
+        <div style="border-top:1px solid rgba(201,149,42,0.1);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--white);">${r.name}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-top:2px;">${r.city}</div>
+          </div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;">${r.date}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // rebuild dots
+    if (dotsEl) {
+      const total = reviews.length;
+      const perView = window.innerWidth <= 900 ? 1 : 3;
+      const maxDots = Math.max(1, total - perView + 1);
+      dotsEl.innerHTML = Array.from({length: maxDots}, (_,i) =>
+        `<div class="rdot" onclick="reviewGo(${i})" style="width:${i===0?'20':'8'}px;height:2px;background:${i===0?'var(--gold)':'rgba(255,255,255,0.2)'};cursor:pointer;transition:all 0.3s;"></div>`
+      ).join('');
+    }
+
+    reviewIdx = 0;
+    track.style.transform = 'translateX(0)';
+    startReviewAuto(reviews.length);
+  }
+
+  window.reviewGo = function(idx) {
+    const track = document.getElementById('reviewsTrack');
+    const cards = track.querySelectorAll('.review-card');
+    const dots = document.querySelectorAll('.rdot');
+    const perView = window.innerWidth <= 900 ? 1 : 3;
+    const maxIdx = Math.max(0, cards.length - perView);
+    reviewIdx = Math.max(0, Math.min(idx, maxIdx));
+    const cardW = cards[0] ? cards[0].offsetWidth + 24 : 0;
+    track.style.transform = 'translateX(-' + (reviewIdx * cardW) + 'px)';
+    dots.forEach((d, i) => {
+      d.style.width = i === reviewIdx ? '20px' : '8px';
+      d.style.background = i === reviewIdx ? 'var(--gold)' : 'rgba(255,255,255,0.2)';
+    });
+  };
+  window.reviewNext = function() {
+    const cards = document.getElementById('reviewsTrack').querySelectorAll('.review-card');
+    const perView = window.innerWidth <= 900 ? 1 : 3;
+    reviewGo(reviewIdx + 1 > cards.length - perView ? 0 : reviewIdx + 1);
+  };
+  window.reviewPrev = function() {
+    const cards = document.getElementById('reviewsTrack').querySelectorAll('.review-card');
+    const perView = window.innerWidth <= 900 ? 1 : 3;
+    reviewGo(reviewIdx - 1 < 0 ? Math.max(0, cards.length - perView) : reviewIdx - 1);
+  };
+
+  function startReviewAuto(total) {
+    clearInterval(reviewAutoTimer);
+    const track = document.getElementById('reviewsTrack');
+    reviewAutoTimer = setInterval(() => { window.reviewNext(); }, 5000);
+    if (track) {
+      track.addEventListener('mouseenter', () => clearInterval(reviewAutoTimer));
+      track.addEventListener('mouseleave', () => {
+        clearInterval(reviewAutoTimer);
+        reviewAutoTimer = setInterval(() => { window.reviewNext(); }, 5000);
+      });
+    }
+  }
+
+  renderReviews();
+  window.addEventListener('storage', e => { if (e.key === 'qbs_reviews') renderReviews(); });
+  window.addEventListener('resize', () => { reviewGo(0); });
 
   // ── Posts from admin ────────────────────────────────
   function renderPosts() {

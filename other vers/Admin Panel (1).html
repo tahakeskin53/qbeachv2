@@ -284,7 +284,7 @@
     <input class="login-input" type="password" id="loginPass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Giriş Yap</button>
     <div class="login-err" id="loginErr">Kullanıcı adı veya şifre hatalı.</div>
-    <div style="margin-top:20px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:center;">Demo: admin / qbeach2024</div>
+    <div style="margin-top:20px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:center;">Demo: admin / kazim5353</div>
   </div>
 </div>
 
@@ -307,8 +307,10 @@
       <button class="nav-btn" onclick="showTab('doluluk',this)"><span class="icon">📊</span><span>Doluluk</span></button>
       <button class="nav-btn" onclick="showTab('menu',this)"><span class="icon">🍽</span><span>Menü</span></button>
       <button class="nav-btn" onclick="showTab('posts',this)"><span class="icon">✦</span><span>Post Üretici</span></button>
+      <button class="nav-btn" onclick="showTab('yorumlar',this)"><span class="icon">★</span><span>TA Yorumlar</span></button>
+      <button class="nav-btn" onclick="showTab('otopost',this)"><span class="icon">⏱</span><span>Otomatik Post</span></button>
       <div class="nav-group-label">Diğer</div>
-      <button class="nav-btn" onclick="window.open('Q Beach Side.html','_blank')"><span class="icon">↗</span><span>Siteye Git</span></button>
+      <button class="nav-btn" onclick="window.open('http://127.0.0.1:5500/Q%20Beach%20Side%20(2).html','_blank')"><span class="icon">↗</span><span>Siteye Git</span></button>
     </nav>
     <div class="sidebar-footer">
       <span>v1.0</span>
@@ -523,6 +525,25 @@
         </div>
       </div>
 
+      <!-- API Anahtarı Girişi -->
+      <div id="apiKeyBanner" class="section-card" style="margin-bottom:20px;border-color:rgba(201,149,42,0.35);">
+        <div class="section-card-head" style="border-color:rgba(201,149,42,0.2);">
+          <div class="section-card-title" style="color:var(--gold);">⚙ Anthropic API Anahtarı</div>
+          <div id="apiKeyStatus" style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Bağlı Değil</div>
+        </div>
+        <div class="section-card-body" style="display:flex;gap:12px;align-items:flex-end;">
+          <div class="fg" style="flex:1;margin:0;">
+            <label>API Key (sk-ant-…)</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" style="font-family:monospace;letter-spacing:1px;">
+          </div>
+          <button class="add-btn" onclick="saveApiKey()" style="margin-bottom:0;white-space:nowrap;">Kaydet</button>
+          <button class="action-btn cancel" onclick="clearApiKey()" style="padding:11px 14px;">Sil</button>
+        </div>
+        <div style="padding:0 24px 16px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;">
+          API anahtarınızı <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);text-decoration:none;">console.anthropic.com</a> adresinden alabilirsiniz. Anahtar bu tarayıcıda şifreli olarak saklanır.
+        </div>
+      </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
         <!-- Sol: Üretici -->
         <div>
@@ -586,13 +607,125 @@
       </div>
     </div>
 
+    <!-- ── TRIPADVISOR YORUMLAR ─────────────────────── -->
+    <div class="tab-panel" id="tab-yorumlar">
+      <div class="topbar">
+        <div>
+          <div class="page-title">TripAdvisor Yorumlar</div>
+          <div class="page-sub">Sitede Gösterilecek Yorumları Yönet</div>
+        </div>
+        <a href="https://www.tripadvisor.com.tr/Restaurant_Review-g297968-d4587502-Reviews-Q_Beach_Restaurant_Lounge-Side_Manavgat_Turkish_Mediterranean_Coast.html" target="_blank" class="add-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">↗ TA Sayfasını Aç</a>
+      </div>
 
+      <!-- Yeni Yorum Ekle -->
+      <div class="section-card" style="margin-bottom:20px;">
+        <div class="section-card-head"><div class="section-card-title">Yorum Ekle</div></div>
+        <div class="section-card-body">
+          <div class="form-grid">
+            <div class="fg"><label>Ad / İsim</label><input type="text" id="rvName" placeholder="Örn: Ayşe K."></div>
+            <div class="fg"><label>Şehir / Ülke</label><input type="text" id="rvCity" placeholder="Örn: İstanbul, Türkiye"></div>
+            <div class="fg"><label>Puan</label>
+              <select id="rvRating">
+                <option value="5">★★★★★ — 5</option>
+                <option value="4">★★★★☆ — 4</option>
+                <option value="3">★★★☆☆ — 3</option>
+              </select>
+            </div>
+            <div class="fg"><label>Tarih</label><input type="text" id="rvDate" placeholder="Örn: Ağustos 2024"></div>
+          </div>
+          <div class="fg"><label>Yorum Metni (TripAdvisor'dan kopyala)</label><textarea id="rvText" placeholder="Yorumu buraya yapıştırın…" style="min-height:100px;"></textarea></div>
+          <button class="add-btn" onclick="addReview()">Yorumu Ekle & Yayınla</button>
+        </div>
+      </div>
+
+      <!-- Mevcut Yorumlar -->
+      <div class="section-card">
+        <div class="section-card-head">
+          <div class="section-card-title">Sitedeki Yorumlar</div>
+          <button class="action-btn cancel" onclick="resetReviews()">Varsayılana Sıfırla</button>
+        </div>
+        <div class="section-card-body" id="reviewsList" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="empty-state">Yükleniyor…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OTOMATİK POST ──────────────────────────────── -->
+    <div class="tab-panel" id="tab-otopost">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Otomatik Post</div>
+          <div class="page-sub">Yapay Zeka Otomatik İçerik Üretsin</div>
+        </div>
+        <div class="live-badge" id="otoBadge" style="display:none;"><div class="live-dot"></div>Aktif</div>
+      </div>
+
+      <!-- Ayarlar -->
+      <div class="section-card" style="margin-bottom:20px;">
+        <div class="section-card-head"><div class="section-card-title">Zamanlama Ayarları</div></div>
+        <div class="section-card-body">
+          <div class="form-grid" style="margin-bottom:20px;">
+            <div class="fg">
+              <label>Yayın Sıklığı</label>
+              <select id="otoInterval">
+                <option value="1">Her 1 saatte bir</option>
+                <option value="2">Her 2 saatte bir</option>
+                <option value="4" selected>Her 4 saatte bir</option>
+                <option value="6">Her 6 saatte bir</option>
+                <option value="12">Her 12 saatte bir</option>
+                <option value="24">Günde bir kez</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Platform Sırası</label>
+              <select id="otoPlatform">
+                <option value="rotate">Sırayla (IG → FB → WA → TT)</option>
+                <option value="instagram">Sadece Instagram</option>
+                <option value="facebook">Sadece Facebook</option>
+                <option value="whatsapp">Sadece WhatsApp</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <button class="add-btn" id="otoToggleBtn" onclick="toggleOtoPost()">▶ Otomatik Postu Başlat</button>
+            <button class="action-btn" onclick="triggerNow()" style="padding:12px 20px;">⚡ Şimdi Üret</button>
+          </div>
+          <div id="otoStatus" style="margin-top:16px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:1px;display:none;"></div>
+        </div>
+      </div>
+
+      <!-- Sıradaki Post Önizleme -->
+      <div class="section-card" id="otoPreviewCard" style="display:none;">
+        <div class="section-card-head"><div class="section-card-title">Son Üretilen Post</div></div>
+        <div class="section-card-body">
+          <div id="otoPreviewText" style="font-size:13px;line-height:1.8;color:rgba(255,248,239,0.8);white-space:pre-wrap;margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="add-btn" onclick="publishOtoPost()">✦ Siteye Yayınla</button>
+            <button class="action-btn" onclick="copyOtoPost()">Kopyala</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geçmiş Oto Postlar -->
+      <div class="section-card" style="margin-top:20px;">
+        <div class="section-card-head">
+          <div class="section-card-title">Otomatik Yayınlanan Postlar</div>
+          <button class="action-btn cancel" onclick="clearOtoPosts()">Temizle</button>
+        </div>
+        <div class="section-card-body" id="otoHistoryList" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="empty-state" id="otoEmpty">Henüz otomatik post yok.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
 
 <div id="toast">✓ İşlem tamamlandı</div>
 
 <script>
 // ── AUTH ─────────────────────────────────────────────
-const CREDS = { admin: 'qbeach2024' };
+const CREDS = { admin: 'kazim5353' };
 
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
@@ -872,8 +1005,70 @@ function delMenuItem(cat, idx) {
   toast('✓ Ürün silindi');
 }
 
+// ── ANTHROPIC API BAĞLANTISI ──────────────────────────
+function getApiKey() {
+  return localStorage.getItem('qbs_api_key') || '';
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) { alert('Geçerli bir Anthropic API anahtarı girin (sk-ant- ile başlar).'); return; }
+  localStorage.setItem('qbs_api_key', key);
+  document.getElementById('apiKeyInput').value = '';
+  updateApiKeyUI();
+  toast('✓ API anahtarı kaydedildi');
+}
+
+function clearApiKey() {
+  if (!confirm('API anahtarı silinsin mi?')) return;
+  localStorage.removeItem('qbs_api_key');
+  updateApiKeyUI();
+  toast('✓ API anahtarı silindi');
+}
+
+function updateApiKeyUI() {
+  const key = getApiKey();
+  const status = document.getElementById('apiKeyStatus');
+  const input = document.getElementById('apiKeyInput');
+  if (key) {
+    if (status) { status.textContent = '✓ Bağlı · ' + key.substring(0,12) + '…'; status.style.color = 'var(--green)'; }
+    if (input) input.placeholder = key.substring(0,14) + '… (değiştirmek için yenisini girin)';
+  } else {
+    if (status) { status.textContent = 'Bağlı Değil'; status.style.color = 'var(--muted)'; }
+    if (input) input.placeholder = 'sk-ant-api03-…';
+  }
+}
+
+async function callClaude(prompt) {
+  const key = getApiKey();
+  if (!key) throw new Error('API_KEY_MISSING');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
 // ── POST ÜRETİCİ ─────────────────────────────────────
 async function generatePost() {
+  const key = getApiKey();
+  if (!key) { alert('Önce Anthropic API anahtarınızı girin.'); return; }
+
   const platform = document.getElementById('ai-platform').value;
   const topic = document.getElementById('ai-topic').value;
   const extra = document.getElementById('ai-extra').value;
@@ -884,19 +1079,16 @@ async function generatePost() {
   document.getElementById('ai-result-card').style.display = 'none';
   document.getElementById('publish-ok').style.display = 'none';
 
-  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.
-
-${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}
-
-Platforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
+  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\n${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}\n\nPlatforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
 
   try {
-    const text = await window.claude.complete({ messages: [{ role: 'user', content: prompt }] });
+    const text = await callClaude(prompt);
     document.getElementById('ai-output').textContent = text;
     document.getElementById('ai-result-card').style.display = 'block';
     document.getElementById('ai-result-card').dataset.platform = platform;
   } catch(e) {
-    document.getElementById('ai-output').textContent = 'Post oluşturulurken hata oluştu.';
+    const msg = e.message === 'API_KEY_MISSING' ? 'API anahtarı girilmedi.' : ('Hata: ' + e.message);
+    document.getElementById('ai-output').textContent = msg;
     document.getElementById('ai-result-card').style.display = 'block';
   } finally {
     document.getElementById('ai-loading').style.display = 'none';
@@ -964,12 +1156,274 @@ function deletePost(id) {
   toast('✓ Post silindi');
 }
 
+// ── TRIPADVISOR YORUMLAR ──────────────────────────────
+const DEFAULT_REVIEWS = [
+  { id:'r1', name:'Ayşe K.', city:'İstanbul, Türkiye', rating:5, text:'Hem deniz manzarası hem de yemekler muhteşemdi. Levrek ızgarası hayatımda yediğim en taze balıktı. Gün batımında kokteylinizi yudumlarken dünyanın en güzel yerinde olduğunuzu hissediyorsunuz. Kesinlikle tekrar geleceğiz.', date:'Ağustos 2024' },
+  { id:'r2', name:'James & Sarah T.', city:'London, UK', rating:5, text:'Absolutely stunning location and exceptional food. The seafood platter was incredibly fresh and the service was impeccable. The sunset view from our table was breathtaking. One of the best dining experiences we had in Turkey!', date:'Temmuz 2024' },
+  { id:'r3', name:'Mehmet A.', city:'Ankara, Türkiye', rating:5, text:"Harika bir mekan! Plaj alanı tertemiz ve şık, yemekler ise lezzetli. Özellikle Surf & Turf'ü mutlaka deneyin. Personel çok ilgili ve profesyonel. Side'ye her gelişimizde Q Beach'e uğruyoruz.", date:'Eylül 2024' },
+  { id:'r4', name:'Klaus M.', city:'München, Germany', rating:5, text:'Ein wunderschönes Restaurant direkt am Meer. Das Essen war hervorragend, besonders der Oktopus-Grill. Die Atmosphäre beim Sonnenuntergang ist einfach unvergesslich.', date:'Ekim 2024' },
+  { id:'r5', name:'Elif & Burak S.', city:'İzmir, Türkiye', rating:5, text:"Yıllardır bu sahile geliyoruz ama Q Beach'i keşfetmek bambaşka bir deneyim oldu. Kokteylleri, özellikle Q Signature, eşsiz. Gün batımı saatlerinde masa bulmak zor olabiliyor, mutlaka rezervasyon yaptırın!", date:'Temmuz 2024' },
+  { id:'r6', name:'Marie-Claire D.', city:'Paris, France', rating:5, text:"Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L'ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.", date:'Ağustos 2024' }
+];
+
+function getReviews() {
+  const s = localStorage.getItem('qbs_reviews');
+  return s ? JSON.parse(s) : [...DEFAULT_REVIEWS];
+}
+function saveReviews(arr) {
+  localStorage.setItem('qbs_reviews', JSON.stringify(arr));
+}
+
+function renderAdminReviews() {
+  const reviews = getReviews();
+  const el = document.getElementById('reviewsList');
+  if (!el) return;
+  const stars = r => '★'.repeat(r) + '☆'.repeat(5-r);
+  el.innerHTML = reviews.length ? reviews.map((r,i) => `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:600;color:var(--white);">${r.name}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);">${r.city}</span>
+          <span style="font-size:11px;color:#34A853;">${stars(r.rating)}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.25);">${r.date}</span>
+        </div>
+        <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.55);">${r.text.substring(0,160)}${r.text.length>160?'…':''}</p>
+      </div>
+      <button class="action-btn cancel" onclick="deleteReview('${r.id}')" style="padding:5px 10px;flex-shrink:0;">Sil</button>
+    </div>
+  `).join('') : '<div class="empty-state">Henüz yorum yok.</div>';
+}
+
+function addReview() {
+  const name = document.getElementById('rvName').value.trim();
+  const city = document.getElementById('rvCity').value.trim();
+  const rating = parseInt(document.getElementById('rvRating').value);
+  const text = document.getElementById('rvText').value.trim();
+  const date = document.getElementById('rvDate').value.trim();
+  if (!name || !text) { alert('İsim ve yorum metni zorunludur.'); return; }
+  const reviews = getReviews();
+  reviews.push({ id: 'r'+Date.now(), name, city, rating, text, date: date || new Date().toLocaleDateString('tr-TR',{month:'long',year:'numeric'}) });
+  saveReviews(reviews);
+  renderAdminReviews();
+  ['rvName','rvCity','rvText','rvDate'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('rvRating').value = '5';
+  toast('✓ Yorum eklendi — site güncellendi');
+}
+
+function deleteReview(id) {
+  if (!confirm('Bu yorumu silmek istiyor musunuz?')) return;
+  const reviews = getReviews().filter(r => r.id !== id);
+  saveReviews(reviews);
+  renderAdminReviews();
+  toast('✓ Yorum silindi');
+}
+
+function resetReviews() {
+  if (!confirm('Tüm yorumlar silinip varsayılanlara dönülsün mü?')) return;
+  localStorage.removeItem('qbs_reviews');
+  renderAdminReviews();
+  toast('✓ Varsayılan yorumlara döndü');
+}
+
+// ── OTOMATİK POST ─────────────────────────────────────
+const OTO_PLATFORMS = ['instagram','facebook','whatsapp','tiktok'];
+const OTO_TOPICS   = ['gunluk','menu','gunbatimi','rezervasyon','hafta_sonu','yaz'];
+let otoTimer = null;
+let otoLastText = '';
+
+function getOtoSettings() {
+  return JSON.parse(localStorage.getItem('qbs_otopost') || '{"enabled":false,"interval":4,"platformMode":"rotate","platIdx":0,"topicIdx":0,"lastTs":0,"history":[]}');
+}
+function saveOtoSettings(s) { localStorage.setItem('qbs_otopost', JSON.stringify(s)); }
+
+function initOtoPost() {
+  const s = getOtoSettings();
+  document.getElementById('otoInterval').value = String(s.interval);
+  document.getElementById('otoPlatform').value = s.platformMode || 'rotate';
+  updateOtoUI(s);
+  if (s.enabled) {
+    scheduleOtoCheck(s);
+    checkOtoNow(s);
+  }
+  renderOtoHistory(s);
+}
+
+function updateOtoUI(s) {
+  const btn = document.getElementById('otoToggleBtn');
+  const badge = document.getElementById('otoBadge');
+  const status = document.getElementById('otoStatus');
+  if (s.enabled) {
+    btn.textContent = '⏹ Otomatik Postu Durdur';
+    btn.style.background = 'var(--red-dark)';
+    badge.style.display = 'flex';
+    const next = s.lastTs + s.interval * 3600000;
+    const diff = Math.max(0, next - Date.now());
+    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+    status.style.display = 'block';
+    status.innerHTML = `✓ Otomatik yayın aktif · Sıradaki post: <strong style="color:var(--white);">${h}s ${m}d sonra</strong> · Son: ${s.lastTs ? new Date(s.lastTs).toLocaleTimeString('tr-TR') : '—'}`;
+  } else {
+    btn.textContent = '▶ Otomatik Postu Başlat';
+    btn.style.background = '';
+    badge.style.display = 'none';
+    status.style.display = 'none';
+  }
+}
+
+function toggleOtoPost() {
+  const s = getOtoSettings();
+  s.interval = parseInt(document.getElementById('otoInterval').value);
+  s.platformMode = document.getElementById('otoPlatform').value;
+  s.enabled = !s.enabled;
+  if (s.enabled && !s.lastTs) s.lastTs = Date.now() - s.interval * 3600000;
+  saveOtoSettings(s);
+  clearInterval(otoTimer);
+  if (s.enabled) { scheduleOtoCheck(s); checkOtoNow(s); }
+  updateOtoUI(s);
+  toast(s.enabled ? '✓ Otomatik post başlatıldı' : '✓ Otomatik post durduruldu');
+}
+
+function scheduleOtoCheck(s) {
+  clearInterval(otoTimer);
+  otoTimer = setInterval(() => {
+    const cur = getOtoSettings();
+    if (!cur.enabled) { clearInterval(otoTimer); return; }
+    checkOtoNow(cur);
+    updateOtoUI(cur);
+  }, 60000);
+}
+
+async function checkOtoNow(s) {
+  const now = Date.now();
+  if (now - s.lastTs >= s.interval * 3600000) {
+    await autoGenerate(s);
+  }
+}
+
+async function triggerNow() {
+  const s = getOtoSettings();
+  s.interval = parseInt(document.getElementById('otoInterval').value);
+  s.platformMode = document.getElementById('otoPlatform').value;
+  await autoGenerate(s);
+}
+
+async function autoGenerate(s) {
+  const key = getApiKey();
+  if (!key) {
+    const statusEl = document.getElementById('otoStatus');
+    statusEl.style.display = 'block';
+    statusEl.innerHTML = '❌ API anahtarı girilmedi. <strong style="color:var(--white)">Post Üretici</strong> sekmesinden API anahtarınızı kaydedin.';
+    return;
+  }
+
+  const platMap = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
+  const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
+
+  const platform = s.platformMode === 'rotate'
+    ? OTO_PLATFORMS[s.platIdx % OTO_PLATFORMS.length]
+    : s.platformMode;
+  const topic = OTO_TOPICS[s.topicIdx % OTO_TOPICS.length];
+
+  const statusEl = document.getElementById('otoStatus');
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '⏳ Post üretiliyor…';
+
+  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\n${platMap[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.\n\nPlatforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
+
+  try {
+    const text = await callClaude(prompt);
+    otoLastText = text;
+
+    // auto-publish
+    const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+    const now = new Date();
+    posts.push({ id: Date.now().toString(), platform, text, date: now.toLocaleDateString('tr-TR') });
+    localStorage.setItem('qbs_posts', JSON.stringify(posts));
+
+    // save to history
+    s.lastTs = Date.now();
+    s.platIdx = (s.platIdx + 1) % OTO_PLATFORMS.length;
+    s.topicIdx = (s.topicIdx + 1) % OTO_TOPICS.length;
+    if (!s.history) s.history = [];
+    s.history.unshift({ platform, topic, text: text.substring(0,120)+'…', ts: s.lastTs });
+    if (s.history.length > 10) s.history.pop();
+    saveOtoSettings(s);
+
+    // show preview
+    document.getElementById('otoPreviewCard').style.display = 'block';
+    document.getElementById('otoPreviewText').textContent = text;
+    renderOtoHistory(s);
+    updateOtoUI(s);
+    renderPublishedPosts();
+    toast('✓ Otomatik post üretildi ve yayınlandı');
+  } catch(e) {
+    const msg = e.message === 'API_KEY_MISSING'
+      ? '❌ API anahtarı girilmedi.'
+      : '❌ Hata: ' + e.message;
+    statusEl.innerHTML = msg;
+  }
+}
+
+function publishOtoPost() {
+  if (!otoLastText) return;
+  const s = getOtoSettings();
+  const platform = s.platformMode === 'rotate' ? OTO_PLATFORMS[(s.platIdx-1+OTO_PLATFORMS.length)%OTO_PLATFORMS.length] : s.platformMode;
+  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+  posts.push({ id: Date.now().toString(), platform, text: otoLastText, date: new Date().toLocaleDateString('tr-TR') });
+  localStorage.setItem('qbs_posts', JSON.stringify(posts));
+  renderPublishedPosts();
+  toast('✓ Post siteye yayınlandı');
+}
+
+function copyOtoPost() {
+  if (!otoLastText) return;
+  navigator.clipboard.writeText(otoLastText).then(() => toast('✓ Kopyalandı'));
+}
+
+function clearOtoPosts() {
+  if (!confirm('Otomatik post geçmişi silinsin mi?')) return;
+  const s = getOtoSettings();
+  s.history = [];
+  saveOtoSettings(s);
+  renderOtoHistory(s);
+  toast('✓ Geçmiş temizlendi');
+}
+
+function renderOtoHistory(s) {
+  const el = document.getElementById('otoHistoryList');
+  const empty = document.getElementById('otoEmpty');
+  if (!el) return;
+  const h = s.history || [];
+  if (!h.length) { el.innerHTML = '<div class="empty-state" id="otoEmpty">Henüz otomatik post yok.</div>'; return; }
+  const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵' };
+  el.innerHTML = h.map(p => `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:14px 18px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||''} ${p.platform}</span>
+        <span style="font-size:9px;color:var(--muted);">${new Date(p.ts).toLocaleString('tr-TR')}</span>
+      </div>
+      <p style="font-size:11px;line-height:1.6;color:rgba(255,248,239,0.5);">${p.text}</p>
+    </div>
+  `).join('');
+}
+
 // ── INIT ─────────────────────────────────────────────
 function initApp() {
   renderDashboard();
   renderPublishedPosts();
+  renderAdminReviews();
+  initOtoPost();
+  updateApiKeyUI();
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
 }
+
+// Tab'a geçince ilgili render'ı çalıştır
+const _origShowTab = showTab;
+showTab = function(tab, btn) {
+  _origShowTab(tab, btn);
+  if (tab === 'yorumlar') renderAdminReviews();
+  if (tab === 'otopost') { const s = getOtoSettings(); updateOtoUI(s); renderOtoHistory(s); }
+};
 
 if (sessionStorage.getItem('qbs_admin')) initApp();
 </script>
