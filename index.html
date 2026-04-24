@@ -1522,18 +1522,41 @@ const sb = {
   fillSaatler(RESTORAN_SAATLER);
 
   // ── Submit reservation ──────────────────────────────
-  function submitRezervasyon() {
-    const name = document.getElementById('rName').value.trim();
-    const phone = document.getElementById('rPhone').value.trim();
-    const date = document.getElementById('rDate').value;
-    const time = document.getElementById('rTime').value;
-    if (!name || !phone || !date || !time) {
-      alert('Lütfen ad, telefon, tarih ve saat alanlarını doldurun.');
-      return;
-    }
-    document.getElementById('rezv-form-content').style.display = 'none';
-    document.getElementById('rezv-success').style.display = 'block';
+async function submitRezervasyon() {
+  const name = document.getElementById('rName').value.trim();
+  const phone = document.getElementById('rPhone').value.trim();
+  const date = document.getElementById('rDate').value;
+  const time = document.getElementById('rTime').value;
+  if (!name || !phone || !date || !time) {
+    alert('Lütfen ad, telefon, tarih ve saat alanlarını doldurun.');
+    return;
   }
+
+  // Önce müşteriyi kaydet
+  const musteriData = await sb.insert('musteri', {
+    ad: name,
+    soyad: '',
+    telefon: phone,
+    email: ''
+  });
+
+  const musteri_id = musteriData[0].musteri_id;
+  const alan_id = currentType === 'restoran' ? 1 : 2;
+
+  // Rezervasyonu kaydet
+  await sb.insert('rezervasyon', {
+    musteri_id: musteri_id,
+    alan_id: alan_id,
+    tarih: date,
+    saat: time,
+    kisi_sayisi: parseInt(document.getElementById('rGuests').value),
+    durum: 'bekleyen',
+    notlar: document.getElementById('rNotes').value
+  });
+
+  document.getElementById('rezv-form-content').style.display = 'none';
+  document.getElementById('rezv-success').style.display = 'block';
+}
 
   // ── Set min date ────────────────────────────────────
   document.getElementById('rDate').min = new Date().toISOString().split('T')[0];
