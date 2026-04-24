@@ -724,6 +724,41 @@
 <div id="toast">✓ İşlem tamamlandı</div>
 
 <script>
+// ── SUPABASE ──────────────────────────────────────────
+const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
+
+const sb = {
+  async query(table, params = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    return res.json();
+  },
+  async insert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  async patch(table, data, match) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  async del(table, match) {
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+  }
+};
+
 // ── AUTH ─────────────────────────────────────────────
 const CREDS = { admin: 'kazim5353' };
 
@@ -807,17 +842,22 @@ function toast(msg) {
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
-function renderDashboard() {
+async function renderDashboard() {
   const today = new Date().toISOString().split('T')[0];
-  const todayList = reservations.filter(r => r.date === today);
-  const pending = reservations.filter(r => r.status === 'pending');
+  const allRezv = await sb.query('rezervasyon', 'select=*,musteri(ad,soyad,telefon)&order=olusturma_zamani.desc');
+  if (!Array.isArray(allRezv)) return;
+  const todayList = allRezv.filter(r => r.tarih === today);
+  const pending = allRezv.filter(r => r.durum === 'bekleyen');
   document.getElementById('dashTodayCount').textContent = todayList.length;
   document.getElementById('dashPendingCount').textContent = pending.length;
-  const dol = JSON.parse(localStorage.getItem('qbs_doluluk') || '{}');
-  document.getElementById('dashRDol').textContent = (dol.restoran || '—') + (dol.restoran ? '%' : '');
-  document.getElementById('dashPDol').textContent = (dol.plaj || '—') + (dol.plaj ? '%' : '');
 
-  const recent = [...reservations].reverse().slice(0, 6);
+  const doluluk = await sb.query('doluluk_kaydi', 'select=alan_id,doluluk_yuzdesi&order=zaman_damgasi.desc&limit=10');
+  const rDol = Array.isArray(doluluk) ? doluluk.find(d => d.alan_id === 1) : null;
+  const pDol = Array.isArray(doluluk) ? doluluk.find(d => d.alan_id === 2) : null;
+  document.getElementById('dashRDol').textContent = rDol ? rDol.doluluk_yuzdesi + '%' : '—';
+  document.getElementById('dashPDol').textContent = pDol ? pDol.doluluk_yuzdesi + '%' : '—';
+
+  const recent = allRezv.slice(0, 6);
   const tbody = document.getElementById('dashRezvTable');
   tbody.innerHTML = recent.length ? recent.map(r => rezvRow(r, true)).join('') : '<tr><td colspan="6" class="empty-state">Henüz rezervasyon yok.</td></tr>';
 }
@@ -826,34 +866,37 @@ function renderDashboard() {
 let currentFilter = 'all';
 
 function rezvRow(r, short) {
-  const statusMap = { pending:'badge-pending', confirmed:'badge-confirmed', cancelled:'badge-cancelled' };
-  const statusLabel = { pending:'Bekleyen', confirmed:'Onaylı', cancelled:'İptal' };
-  const typeLabel = r.type === 'plaj' ? '<span class="badge badge-plaj">Plaj</span>' : '<span class="badge badge-restoran">Restoran</span>';
+  const ad = r.musteri ? r.musteri.ad + ' ' + (r.musteri.soyad || '') : '—';
+  const telefon = r.musteri ? r.musteri.telefon : '—';
+  const statusMap = { bekleyen:'badge-pending', onaylı:'badge-confirmed', iptal:'badge-cancelled' };
+  const statusLabel = { bekleyen:'Bekleyen', onaylı:'Onaylı', iptal:'İptal' };
+  const alanLabel = r.alan_id === 2 ? '<span class="badge badge-plaj">Plaj</span>' : '<span class="badge badge-restoran">Restoran</span>';
   const actions = short ? `<td><button class="action-btn" onclick="showTab('rezervasyonlar',null)">Detay</button></td>` :
     `<td>
-      ${r.status === 'pending' ? `<button class="action-btn confirm" onclick="setStatus('${r.id}','confirmed')">Onayla</button>` : ''}
-      ${r.status !== 'cancelled' ? `<button class="action-btn cancel" onclick="setStatus('${r.id}','cancelled')">İptal</button>` : ''}
-      <button class="action-btn" onclick="delRezv('${r.id}')" style="color:rgba(200,16,46,0.4);">Sil</button>
+      ${r.durum === 'bekleyen' ? `<button class="action-btn confirm" onclick="setStatus(${r.rezervasyon_id},'onaylı')">Onayla</button>` : ''}
+      ${r.durum !== 'iptal' ? `<button class="action-btn cancel" onclick="setStatus(${r.rezervasyon_id},'iptal')">İptal</button>` : ''}
+      <button class="action-btn" onclick="delRezv(${r.rezervasyon_id})" style="color:rgba(200,16,46,0.4);">Sil</button>
     </td>`;
   return `<tr>
-    <td style="font-weight:500;color:var(--white)">${r.name}</td>
-    ${!short ? `<td style="color:var(--muted)">${r.phone}</td>` : ''}
-    <td>${r.date} ${r.time}</td>
-    <td>${typeLabel}</td>
-    <td>${r.guests}</td>
-    <td><span class="badge ${statusMap[r.status]}">${statusLabel[r.status]}</span></td>
-    ${!short ? `<td style="font-size:10px;color:var(--muted);max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${r.notes || '—'}</td>` : ''}
+    <td style="font-weight:500;color:var(--white)">${ad}</td>
+    ${!short ? `<td style="color:var(--muted)">${telefon}</td>` : ''}
+    <td>${r.tarih} ${r.saat ? r.saat.substring(0,5) : ''}</td>
+    <td>${alanLabel}</td>
+    <td>${r.kisi_sayisi || '—'}</td>
+    <td><span class="badge ${statusMap[r.durum] || 'badge-pending'}">${statusLabel[r.durum] || r.durum}</span></td>
+    ${!short ? `<td style="font-size:10px;color:var(--muted);max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${r.notlar || '—'}</td>` : ''}
     ${actions}
   </tr>`;
 }
 
-function renderRezv(filter) {
+async function renderRezv(filter) {
   currentFilter = filter;
-  let list = [...reservations].reverse();
-  if (filter === 'pending') list = list.filter(r => r.status === 'pending');
-  if (filter === 'confirmed') list = list.filter(r => r.status === 'confirmed');
-  if (filter === 'restoran') list = list.filter(r => r.type === 'restoran');
-  if (filter === 'plaj') list = list.filter(r => r.type === 'plaj');
+  let list = await sb.query('rezervasyon', 'select=*,musteri(ad,soyad,telefon)&order=olusturma_zamani.desc');
+  if (!Array.isArray(list)) list = [];
+  if (filter === 'pending') list = list.filter(r => r.durum === 'bekleyen');
+  if (filter === 'confirmed') list = list.filter(r => r.durum === 'onaylı');
+  if (filter === 'restoran') list = list.filter(r => r.alan_id === 1);
+  if (filter === 'plaj') list = list.filter(r => r.alan_id === 2);
   const tbody = document.getElementById('rezvTable');
   tbody.innerHTML = list.map(r => rezvRow(r, false)).join('');
   document.getElementById('rezvEmpty').style.display = list.length ? 'none' : 'block';
@@ -871,47 +914,47 @@ function showAddRezv() {
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
 }
 
-function addRezv() {
+async function addRezv() {
   const name = document.getElementById('nrName').value.trim();
   const phone = document.getElementById('nrPhone').value.trim();
   const date = document.getElementById('nrDate').value;
   const time = document.getElementById('nrTime').value;
   if (!name || !date || !time) { alert('Ad, tarih ve saat gerekli.'); return; }
-  const r = {
-    id: Date.now().toString(),
-    name, phone, date, time,
-    type: document.getElementById('nrType').value,
-    guests: document.getElementById('nrGuests').value,
-    notes: document.getElementById('nrNotes').value,
-    status: 'confirmed',
-    createdAt: new Date().toISOString()
-  };
-  reservations.push(r);
-  saveData();
+  const musteriData = await sb.insert('musteri', { ad: name, soyad: '', telefon: phone, email: '' });
+  const musteri_id = musteriData[0].musteri_id;
+  const alan_id = document.getElementById('nrType').value === 'plaj' ? 2 : 1;
+  await sb.insert('rezervasyon', {
+    musteri_id, alan_id, tarih: date, saat: time,
+    kisi_sayisi: parseInt(document.getElementById('nrGuests').value),
+    durum: 'onaylı',
+    notlar: document.getElementById('nrNotes').value
+  });
   document.getElementById('addRezvCard').style.display = 'none';
   renderRezv(currentFilter);
+  renderDashboard();
   toast('✓ Rezervasyon eklendi');
 }
 
-function setStatus(id, status) {
-  const r = reservations.find(x => x.id === id);
-  if (r) { r.status = status; saveData(); renderRezv(currentFilter); renderDashboard(); }
-  toast(status === 'confirmed' ? '✓ Rezervasyon onaylandı' : '✓ Rezervasyon iptal edildi');
+async function setStatus(id, durum) {
+  await sb.patch('rezervasyon', { durum }, `rezervasyon_id=eq.${id}`);
+  renderRezv(currentFilter);
+  renderDashboard();
+  toast(durum === 'onaylı' ? '✓ Rezervasyon onaylandı' : '✓ Rezervasyon iptal edildi');
 }
 
-function delRezv(id) {
+async function delRezv(id) {
   if (!confirm('Rezervasyonu silmek istiyor musunuz?')) return;
-  reservations = reservations.filter(x => x.id !== id);
-  saveData();
+  await sb.del('rezervasyon', `rezervasyon_id=eq.${id}`);
   renderRezv(currentFilter);
+  renderDashboard();
   toast('✓ Silindi');
 }
 
 // ── DOLULUK ───────────────────────────────────────────
-function loadDoluluk() {
-  const saved = JSON.parse(localStorage.getItem('qbs_doluluk') || '{}');
-  const r = saved.restoran || 75;
-  const p = saved.plaj || 50;
+async function loadDoluluk() {
+  const data = await sb.query('doluluk_kaydi', 'select=alan_id,doluluk_yuzdesi&order=zaman_damgasi.desc&limit=10');
+  const r = Array.isArray(data) && data.find(d => d.alan_id === 1) ? data.find(d => d.alan_id === 1).doluluk_yuzdesi : 75;
+  const p = Array.isArray(data) && data.find(d => d.alan_id === 2) ? data.find(d => d.alan_id === 2).doluluk_yuzdesi : 50;
   document.getElementById('rSlider').value = r;
   document.getElementById('pSlider').value = p;
   updateSlider('r', r);
@@ -933,10 +976,11 @@ function updateSlider(type, val) {
   }
 }
 
-function saveDoluluk() {
+async function saveDoluluk() {
   const r = parseInt(document.getElementById('rSlider').value);
   const p = parseInt(document.getElementById('pSlider').value);
-  localStorage.setItem('qbs_doluluk', JSON.stringify({ restoran: r, plaj: p, ts: Date.now() }));
+  await sb.insert('doluluk_kaydi', { alan_id: 1, doluluk_yuzdesi: r });
+  await sb.insert('doluluk_kaydi', { alan_id: 2, doluluk_yuzdesi: p });
   const saved = document.getElementById('dolSaved');
   saved.style.display = 'block';
   toast('✓ Doluluk siteye yayınlandı');
