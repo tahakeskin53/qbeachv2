@@ -697,9 +697,20 @@
 
       <!-- Ayarlar -->
       <div class="section-card" style="margin-bottom:20px;">
-        <div class="section-card-head"><div class="section-card-title">Zamanlama Ayarları</div></div>
+        <div class="section-card-head">
+          <div class="section-card-title">Zamanlama Ayarları</div>
+          <div style="font-size:9px;letter-spacing:1px;color:var(--muted);">Postlar sadece sitede yayınlanır</div>
+        </div>
         <div class="section-card-body">
           <div class="form-grid" style="margin-bottom:20px;">
+            <div class="fg">
+              <label>Yapay Zeka Modeli</label>
+              <select id="otoModel">
+                <option value="claude">Claude (Anthropic)</option>
+                <option value="chatgpt">ChatGPT (OpenAI)</option>
+                <option value="gemini">Gemini (Google)</option>
+              </select>
+            </div>
             <div class="fg">
               <label>Yayın Sıklığı</label>
               <select id="otoInterval">
@@ -712,14 +723,17 @@
               </select>
             </div>
             <div class="fg">
-              <label>Platform Sırası</label>
+              <label>Konu Sırası</label>
               <select id="otoPlatform">
-                <option value="rotate">Sırayla (IG → FB → WA → TT)</option>
-                <option value="instagram">Sadece Instagram</option>
-                <option value="facebook">Sadece Facebook</option>
-                <option value="whatsapp">Sadece WhatsApp</option>
+                <option value="rotate">Tüm konuları sırayla dön</option>
+                <option value="instagram">Hep Günlük Davet</option>
+                <option value="facebook">Hep Menü Önerisi</option>
+                <option value="whatsapp">Hep Günbatımı</option>
               </select>
             </div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.02);border-left:2px solid var(--gold);">
+            ℹ️ Üretilen postlar otomatik olarak <strong style="color:var(--white)">sitenin Duyurular bölümünde</strong> yayınlanır. Instagram/Facebook'a otomatik gönderim yapılmaz — postları kopyalayıp manuel paylaşabilirsiniz.
           </div>
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
             <button class="add-btn" id="otoToggleBtn" onclick="toggleOtoPost()">▶ Otomatik Postu Başlat</button>
@@ -1411,57 +1425,50 @@ async function triggerNow() {
 }
 
 async function autoGenerate(s) {
-  const key = getApiKey();
+  const model = document.getElementById('otoModel') ? document.getElementById('otoModel').value : (s.model || 'claude');
+  const modelNames = { claude:'Claude', chatgpt:'ChatGPT', gemini:'Gemini' };
+  const key = getApiKey(model);
+  const statusEl = document.getElementById('otoStatus');
+  statusEl.style.display = 'block';
+
   if (!key) {
-    const statusEl = document.getElementById('otoStatus');
-    statusEl.style.display = 'block';
-    statusEl.innerHTML = '❌ API anahtarı girilmedi. <strong style="color:var(--white)">Post Üretici</strong> sekmesinden API anahtarınızı kaydedin.';
+    statusEl.innerHTML = `❌ <strong style="color:var(--white)">${modelNames[model]}</strong> API anahtarı girilmedi. <strong style="color:var(--white)">Post Üretici</strong> sekmesinden API anahtarınızı kaydedin.`;
     return;
   }
 
-  const platMap = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
   const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
-
-  const platform = s.platformMode === 'rotate'
-    ? OTO_PLATFORMS[s.platIdx % OTO_PLATFORMS.length]
-    : s.platformMode;
   const topic = OTO_TOPICS[s.topicIdx % OTO_TOPICS.length];
+  s.model = model;
 
-  const statusEl = document.getElementById('otoStatus');
-  statusEl.style.display = 'block';
-  statusEl.innerHTML = '⏳ Post üretiliyor…';
+  statusEl.innerHTML = `⏳ ${modelNames[model]} ile post üretiliyor…`;
 
-  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\n${platMap[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.\n\nPlatforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
+  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\nTürkçe bir site duyurusu / sosyal medya postu yaz. Konu: ${topicNames[topic]}.\n\nSamimi ama şık bir dil kullan. 5-8 satır olsun. Emoji kullanabilirsin. Sona #QBeachSide #SideAntalya #BeachRestaurant hashtaglerini ekle.`;
 
   try {
-    const text = await callClaude(prompt);
+    const text = await callAI(prompt, model);
     otoLastText = text;
 
-    // auto-publish
     const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
-    const now = new Date();
-    posts.push({ id: Date.now().toString(), platform, text, date: now.toLocaleDateString('tr-TR') });
+    posts.push({ id: Date.now().toString(), platform: 'site', text, date: new Date().toLocaleDateString('tr-TR'), model: modelNames[model] });
     localStorage.setItem('qbs_posts', JSON.stringify(posts));
 
-    // save to history
     s.lastTs = Date.now();
-    s.platIdx = (s.platIdx + 1) % OTO_PLATFORMS.length;
     s.topicIdx = (s.topicIdx + 1) % OTO_TOPICS.length;
     if (!s.history) s.history = [];
-    s.history.unshift({ platform, topic, text: text.substring(0,120)+'…', ts: s.lastTs });
+    s.history.unshift({ platform: 'site', topic, text: text.substring(0,120)+'…', ts: s.lastTs, model: modelNames[model] });
     if (s.history.length > 10) s.history.pop();
     saveOtoSettings(s);
 
-    // show preview
     document.getElementById('otoPreviewCard').style.display = 'block';
     document.getElementById('otoPreviewText').textContent = text;
     renderOtoHistory(s);
     updateOtoUI(s);
     renderPublishedPosts();
-    toast('✓ Otomatik post üretildi ve yayınlandı');
+    statusEl.innerHTML = `✓ ${modelNames[model]} ile post üretildi ve siteye yayınlandı`;
+    toast('✓ Otomatik post üretildi');
   } catch(e) {
-    const msg = e.message === 'API_KEY_MISSING'
-      ? '❌ API anahtarı girilmedi.'
+    const msg = e.message.startsWith('API_KEY_MISSING')
+      ? `❌ ${modelNames[model]} API anahtarı girilmedi.`
       : '❌ Hata: ' + e.message;
     statusEl.innerHTML = msg;
   }
