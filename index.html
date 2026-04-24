@@ -1451,24 +1451,24 @@
     document.getElementById('lastUpdate').textContent = 'Son güncelleme: ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
   }
 
+  async function fetchDoluluk() {
+    try {
+      const data = await sb.select('doluluk_kaydi', 'select=alan_id,doluluk_yuzdesi&order=zaman_damgasi.desc&limit=10');
+      if (!Array.isArray(data)) return;
+      const r = data.find(d => d.alan_id === 1);
+      const p = data.find(d => d.alan_id === 2);
+      if (r || p) applyDoluluk(r ? r.doluluk_yuzdesi : 75, p ? p.doluluk_yuzdesi : 50);
+    } catch(e) {}
+  }
+
   function animateBars() {
-    const saved = JSON.parse(localStorage.getItem('qbs_doluluk') || 'null');
-    const rPct = saved ? saved.restoran : Math.floor(65 + Math.random() * 20);
-    const pPct = saved ? saved.plaj : Math.floor(35 + Math.random() * 30);
-    setTimeout(() => applyDoluluk(rPct, pPct), 400);
+    fetchDoluluk();
   }
 
   function liveUpdate() {
-    const saved = JSON.parse(localStorage.getItem('qbs_doluluk') || 'null');
-    if (saved) { applyDoluluk(saved.restoran, saved.plaj); return; }
-    applyDoluluk(Math.floor(65 + Math.random() * 20), Math.floor(35 + Math.random() * 30));
+    fetchDoluluk();
   }
-  setInterval(liveUpdate, 15000);
-
-  // Listen for admin updates
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'qbs_doluluk') liveUpdate();
-  });
+  setInterval(liveUpdate, 30000);
 
   // ── Reveal on scroll ────────────────────────────────
   const reveals = document.querySelectorAll('.reveal');
