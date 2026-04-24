@@ -13,6 +13,46 @@
 <meta property="og:locale" content="tr_TR">
 <link rel="canonical" href="https://qbeachside.com">
 <script type="application/ld+json">
+ // ── SUPABASE BAĞLANTISI ──────────────────────────────
+const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
+
+const sb = {
+  async insert(table, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+  async select(table, params = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    return res.json();
+  },
+  async update(table, data, match) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  }
+}; 
 {
   "@context": "https://schema.org",
   "@type": "Restaurant",
