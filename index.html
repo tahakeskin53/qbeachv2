@@ -1406,14 +1406,17 @@
   // ── Video switcher ──────────────────────────────────
   let currentVideo = 0;
   const videos = [document.getElementById('v0'), document.getElementById('v1')];
-  videos.forEach(v => v.load());
+
+  // Tüm videoları arka planda başlat — switch'te boş kare kalmasın
+  videos.forEach(v => {
+    v.load();
+    v.play().catch(() => {});
+  });
 
   function goVideo(idx) {
     videos[currentVideo].classList.remove('active');
     currentVideo = idx;
     videos[currentVideo].classList.add('active');
-    videos[currentVideo].currentTime = 0;
-    videos[currentVideo].play();
   }
 
   setInterval(() => {
