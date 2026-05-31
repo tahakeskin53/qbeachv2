@@ -814,19 +814,28 @@ const sb = {
 // ── AUTH ─────────────────────────────────────────────
 const _AU = [97,100,109,105,110];
 const _AP = [107,97,122,105,109,53,51,53,51];
+const _SK = [81,120,55,35,98,75,57,36,109,80]; // session secret
 
 function _dec(a) { return a.map(c => String.fromCharCode(c)).join(''); }
 function _chk(u, p) {
   if (u !== _dec(_AU) || p.length !== _AP.length) return false;
   return [...p].every((c, i) => c.charCodeAt(0) === _AP[i]);
 }
+function _makeToken(u) {
+  return btoa(_dec(_AU) + ':' + _dec(_SK) + ':' + Date.now());
+}
+function _validToken(tok) {
+  try {
+    const parts = atob(tok).split(':');
+    return parts.length >= 3 && parts[0] === _dec(_AU) && parts[1] === _dec(_SK);
+  } catch(e) { return false; }
+}
 
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   if (_chk(u, p)) {
-    const token = btoa(u + ':' + Date.now());
-    sessionStorage.setItem('qbs_admin', token);
+    sessionStorage.setItem('qbs_admin', _makeToken(u));
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
@@ -840,7 +849,7 @@ function doLogout() {
   location.reload();
 }
 
-if (sessionStorage.getItem('qbs_admin')) {
+if (_validToken(sessionStorage.getItem('qbs_admin') || '')) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 }
@@ -1551,7 +1560,7 @@ showTab = function(tab, btn) {
   if (tab === 'otopost') { const s = getOtoSettings(); updateOtoUI(s); renderOtoHistory(s); }
 };
 
-if (sessionStorage.getItem('qbs_admin')) initApp();
+if (_validToken(sessionStorage.getItem('qbs_admin') || '')) initApp();
 </script>
 </body>
 </html>
