@@ -794,10 +794,13 @@ const sb = {
   async patch(table, data, match) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
       method: 'PATCH',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(data)
     });
-    return res.json();
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || err.hint || `HTTP ${res.status}`);
+    }
   },
   async del(table, match) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
@@ -911,7 +914,6 @@ function rezvRow(r, short) {
   const actions = short ? `<td><button class="action-btn" onclick="showTab('rezervasyonlar',null)">Detay</button></td>` :
     `<td>
       ${r.durum === 'bekleyen' ? `<button class="action-btn confirm" onclick="setStatus(${r.rezervasyon_id},'onaylı')">Onayla</button>` : ''}
-      ${r.durum !== 'iptal' ? `<button class="action-btn cancel" onclick="setStatus(${r.rezervasyon_id},'iptal')">İptal</button>` : ''}
       <button class="action-btn" onclick="delRezv(${r.rezervasyon_id})" style="color:rgba(200,16,46,0.4);">Sil</button>
     </td>`;
   return `<tr>
@@ -973,10 +975,14 @@ async function addRezv() {
 }
 
 async function setStatus(id, durum) {
-  await sb.patch('rezervasyon', { durum }, `rezervasyon_id=eq.${id}`);
-  renderRezv(currentFilter);
-  renderDashboard();
-  toast(durum === 'onaylı' ? '✓ Rezervasyon onaylandı' : '✓ Rezervasyon iptal edildi');
+  try {
+    await sb.patch('rezervasyon', { durum }, `rezervasyon_id=eq.${id}`);
+    renderRezv(currentFilter);
+    renderDashboard();
+    toast('✓ Rezervasyon onaylandı');
+  } catch(e) {
+    alert('Güncellenemedi: ' + e.message);
+  }
 }
 
 async function delRezv(id) {
