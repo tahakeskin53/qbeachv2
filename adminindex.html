@@ -772,45 +772,34 @@
 <div id="toast">✓ İşlem tamamlandı</div>
 
 <script>
-// ── SUPABASE ──────────────────────────────────────────
-const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
+// ── MySQL API BAĞLANTISI ──────────────────────────────
+const API = 'api.php';
 
 const sb = {
   async query(table, params = '') {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
+    const actionMap = { rezervasyon: 'rezervasyon_listele', doluluk_kaydi: 'doluluk_getir', urun: 'urun_listele', menu_kategori: 'kategori_listele' };
+    const res = await fetch(`${API}?action=${actionMap[table] || table + '_listele'}`);
     return res.json();
   },
   async insert(table, data) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify(data)
+    const actionMap = { musteri: 'musteri_ekle', rezervasyon: 'rezervasyon_ekle', doluluk_kaydi: 'doluluk_kaydet', urun: 'urun_ekle', menu_kategori: 'kategori_ekle' };
+    const res = await fetch(`${API}?action=${actionMap[table]}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
     });
     return res.json();
   },
   async patch(table, data, match) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
-      method: 'PATCH',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(data)
+    const id = match.split('eq.')[1];
+    const res = await fetch(`${API}?action=rezervasyon_guncelle&id=${id}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || err.hint || `HTTP ${res.status}`);
-    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
   },
   async del(table, match) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' }
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || err.hint || `HTTP ${res.status}`);
-    }
+    const id = match.split('eq.')[1];
+    const actionMap = { rezervasyon: 'rezervasyon_sil', urun: 'urun_sil' };
+    const res = await fetch(`${API}?action=${actionMap[table]}&id=${id}`, { method: 'POST' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
   }
 };
 
@@ -1242,21 +1231,17 @@ async function generatePost() {
   }
 }
 
-function publishPost() {
+async function publishPost() {
   const text = document.getElementById('ai-output').textContent.trim();
   const platform = document.getElementById('ai-result-card').dataset.platform || document.getElementById('ai-platform').value;
+  const model = document.getElementById('ai-result-card').dataset.model || document.getElementById('ai-model').value;
   if (!text) return;
-  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
-  const now = new Date();
-  posts.push({
-    id: Date.now().toString(),
-    platform,
-    text,
-    date: now.toLocaleDateString('tr-TR')
+  await fetch(`${API}?action=post_ekle`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ platform, text, model })
   });
-  localStorage.setItem('qbs_posts', JSON.stringify(posts));
   document.getElementById('publish-ok').style.display = 'block';
-  renderPublishedPosts();
+  await renderPublishedPosts();
   toast('✓ Post siteye yayınlandı');
 }
 
@@ -1265,29 +1250,28 @@ function copyPost() {
   navigator.clipboard.writeText(text).then(() => toast('✓ Kopyalandı'));
 }
 
-function clearPosts() {
+async function clearPosts() {
   if (!confirm('Tüm postlar silinsin mi?')) return;
-  localStorage.removeItem('qbs_posts');
-  renderPublishedPosts();
+  await fetch(`${API}?action=post_temizle`, { method: 'POST' });
+  await renderPublishedPosts();
   toast('✓ Postlar silindi');
 }
 
-function renderPublishedPosts() {
-  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+async function renderPublishedPosts() {
   const container = document.getElementById('published-posts-list');
-  const empty = document.getElementById('no-posts');
-  if (!posts.length) {
+  const posts = await fetch(`${API}?action=post_listele`).then(r => r.json()).catch(() => []);
+  if (!Array.isArray(posts) || !posts.length) {
     container.innerHTML = '<div class="empty-state" id="no-posts">Henüz yayınlanan post yok.</div>';
     return;
   }
-  const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵' };
-  container.innerHTML = posts.slice().reverse().map(p => `
+  const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵', site:'✦' };
+  container.innerHTML = posts.map(p => `
     <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px;position:relative;">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||''} ${p.platform}</span>
+        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||'✦'} ${p.platform}${p.model ? ' · '+p.model : ''}</span>
         <div style="display:flex;gap:8px;align-items:center;">
-          <span style="font-size:9px;color:var(--muted);">${p.date}</span>
-          <button class="action-btn cancel" onclick="deletePost('${p.id}')" style="padding:3px 8px;font-size:8px;">Sil</button>
+          <span style="font-size:9px;color:var(--muted);">${p.created_at ? p.created_at.substring(0,10) : ''}</span>
+          <button class="action-btn cancel" onclick="deletePost(${p.id})" style="padding:3px 8px;font-size:8px;">Sil</button>
         </div>
       </div>
       <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.6);white-space:pre-wrap;">${p.text.substring(0,180)}${p.text.length>180?'…':''}</p>
@@ -1295,81 +1279,82 @@ function renderPublishedPosts() {
   `).join('');
 }
 
-function deletePost(id) {
-  let posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
-  posts = posts.filter(p => p.id !== id);
-  localStorage.setItem('qbs_posts', JSON.stringify(posts));
-  renderPublishedPosts();
+async function deletePost(id) {
+  await fetch(`${API}?action=post_sil&id=${id}`, { method: 'POST' });
+  await renderPublishedPosts();
   toast('✓ Post silindi');
 }
 
 // ── TRIPADVISOR YORUMLAR ──────────────────────────────
 const DEFAULT_REVIEWS = [
-  { id:'r1', name:'Ayşe K.', city:'İstanbul, Türkiye', rating:5, text:'Hem deniz manzarası hem de yemekler muhteşemdi. Levrek ızgarası hayatımda yediğim en taze balıktı. Gün batımında kokteylinizi yudumlarken dünyanın en güzel yerinde olduğunuzu hissediyorsunuz. Kesinlikle tekrar geleceğiz.', date:'Ağustos 2024' },
-  { id:'r2', name:'James & Sarah T.', city:'London, UK', rating:5, text:'Absolutely stunning location and exceptional food. The seafood platter was incredibly fresh and the service was impeccable. The sunset view from our table was breathtaking. One of the best dining experiences we had in Turkey!', date:'Temmuz 2024' },
-  { id:'r3', name:'Mehmet A.', city:'Ankara, Türkiye', rating:5, text:"Harika bir mekan! Plaj alanı tertemiz ve şık, yemekler ise lezzetli. Özellikle Surf & Turf'ü mutlaka deneyin. Personel çok ilgili ve profesyonel. Side'ye her gelişimizde Q Beach'e uğruyoruz.", date:'Eylül 2024' },
-  { id:'r4', name:'Klaus M.', city:'München, Germany', rating:5, text:'Ein wunderschönes Restaurant direkt am Meer. Das Essen war hervorragend, besonders der Oktopus-Grill. Die Atmosphäre beim Sonnenuntergang ist einfach unvergesslich.', date:'Ekim 2024' },
-  { id:'r5', name:'Elif & Burak S.', city:'İzmir, Türkiye', rating:5, text:"Yıllardır bu sahile geliyoruz ama Q Beach'i keşfetmek bambaşka bir deneyim oldu. Kokteylleri, özellikle Q Signature, eşsiz. Gün batımı saatlerinde masa bulmak zor olabiliyor, mutlaka rezervasyon yaptırın!", date:'Temmuz 2024' },
-  { id:'r6', name:'Marie-Claire D.', city:'Paris, France', rating:5, text:"Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L'ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.", date:'Ağustos 2024' }
+  { ad:'Ayşe K.',         sehir:'İstanbul, Türkiye', puan:5, metin:'Hem deniz manzarası hem de yemekler muhteşemdi. Levrek ızgarası hayatımda yediğim en taze balıktı. Gün batımında kokteylinizi yudumlarken dünyanın en güzel yerinde olduğunuzu hissediyorsunuz. Kesinlikle tekrar geleceğiz.', tarih_str:'Ağustos 2024' },
+  { ad:'James & Sarah T.',sehir:'London, UK',         puan:5, metin:'Absolutely stunning location and exceptional food. The seafood platter was incredibly fresh and the service was impeccable. The sunset view from our table was breathtaking. One of the best dining experiences we had in Turkey!', tarih_str:'Temmuz 2024' },
+  { ad:'Mehmet A.',       sehir:'Ankara, Türkiye',    puan:5, metin:"Harika bir mekan! Plaj alanı tertemiz ve şık, yemekler ise lezzetli. Özellikle Surf & Turf'ü mutlaka deneyin. Personel çok ilgili ve profesyonel. Side'ye her gelişimizde Q Beach'e uğruyoruz.", tarih_str:'Eylül 2024' },
+  { ad:'Klaus M.',        sehir:'München, Germany',   puan:5, metin:'Ein wunderschönes Restaurant direkt am Meer. Das Essen war hervorragend, besonders der Oktopus-Grill. Die Atmosphäre beim Sonnenuntergang ist einfach unvergesslich.', tarih_str:'Ekim 2024' },
+  { ad:'Elif & Burak S.', sehir:'İzmir, Türkiye',     puan:5, metin:"Yıllardır bu sahile geliyoruz ama Q Beach'i keşfetmek bambaşka bir deneyim oldu. Kokteylleri, özellikle Q Signature, eşsiz. Gün batımı saatlerinde masa bulmak zor olabiliyor, mutlaka rezervasyon yaptırın!", tarih_str:'Temmuz 2024' },
+  { ad:'Marie-Claire D.', sehir:'Paris, France',      puan:5, metin:"Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L'ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.", tarih_str:'Ağustos 2024' }
 ];
 
-function getReviews() {
-  const s = localStorage.getItem('qbs_reviews');
-  return s ? JSON.parse(s) : [...DEFAULT_REVIEWS];
-}
-function saveReviews(arr) {
-  localStorage.setItem('qbs_reviews', JSON.stringify(arr));
-}
-
-function renderAdminReviews() {
-  const reviews = getReviews();
+async function renderAdminReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
-  const stars = r => '★'.repeat(r) + '☆'.repeat(5-r);
-  el.innerHTML = reviews.length ? reviews.map((r,i) => `
+  el.innerHTML = '<div class="empty-state">Yükleniyor…</div>';
+  const reviews = await fetch(`${API}?action=yorum_listele`).then(r => r.json()).catch(() => []);
+  if (!Array.isArray(reviews) || !reviews.length) {
+    el.innerHTML = '<div class="empty-state">Henüz yorum yok.</div>';
+    return;
+  }
+  const stars = n => '★'.repeat(parseInt(n)) + '☆'.repeat(5 - parseInt(n));
+  el.innerHTML = reviews.map(r => `
     <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
       <div style="flex:1;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-          <span style="font-size:12px;font-weight:600;color:var(--white);">${r.name}</span>
-          <span style="font-size:10px;color:rgba(255,255,255,0.35);">${r.city}</span>
-          <span style="font-size:11px;color:#34A853;">${stars(r.rating)}</span>
-          <span style="font-size:9px;color:rgba(255,255,255,0.25);">${r.date}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--white);">${r.ad}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.35);">${r.sehir || ''}</span>
+          <span style="font-size:11px;color:#34A853;">${stars(r.puan)}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.25);">${r.tarih_str || ''}</span>
         </div>
-        <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.55);">${r.text.substring(0,160)}${r.text.length>160?'…':''}</p>
+        <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.55);">${r.metin.substring(0,160)}${r.metin.length>160?'…':''}</p>
       </div>
-      <button class="action-btn cancel" onclick="deleteReview('${r.id}')" style="padding:5px 10px;flex-shrink:0;">Sil</button>
+      <button class="action-btn cancel" onclick="deleteReview(${r.yorum_id})" style="padding:5px 10px;flex-shrink:0;">Sil</button>
     </div>
-  `).join('') : '<div class="empty-state">Henüz yorum yok.</div>';
+  `).join('');
 }
 
-function addReview() {
-  const name = document.getElementById('rvName').value.trim();
-  const city = document.getElementById('rvCity').value.trim();
-  const rating = parseInt(document.getElementById('rvRating').value);
-  const text = document.getElementById('rvText').value.trim();
-  const date = document.getElementById('rvDate').value.trim();
-  if (!name || !text) { alert('İsim ve yorum metni zorunludur.'); return; }
-  const reviews = getReviews();
-  reviews.push({ id: 'r'+Date.now(), name, city, rating, text, date: date || new Date().toLocaleDateString('tr-TR',{month:'long',year:'numeric'}) });
-  saveReviews(reviews);
-  renderAdminReviews();
+async function addReview() {
+  const ad = document.getElementById('rvName').value.trim();
+  const sehir = document.getElementById('rvCity').value.trim();
+  const puan = parseInt(document.getElementById('rvRating').value);
+  const metin = document.getElementById('rvText').value.trim();
+  const tarih_str = document.getElementById('rvDate').value.trim();
+  if (!ad || !metin) { alert('İsim ve yorum metni zorunludur.'); return; }
+  await fetch(`${API}?action=yorum_ekle`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'}) })
+  });
+  await renderAdminReviews();
   ['rvName','rvCity','rvText','rvDate'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('rvRating').value = '5';
   toast('✓ Yorum eklendi — site güncellendi');
 }
 
-function deleteReview(id) {
+async function deleteReview(id) {
   if (!confirm('Bu yorumu silmek istiyor musunuz?')) return;
-  const reviews = getReviews().filter(r => r.id !== id);
-  saveReviews(reviews);
-  renderAdminReviews();
+  await fetch(`${API}?action=yorum_sil&id=${id}`, { method: 'POST' });
+  await renderAdminReviews();
   toast('✓ Yorum silindi');
 }
 
-function resetReviews() {
+async function resetReviews() {
   if (!confirm('Tüm yorumlar silinip varsayılanlara dönülsün mü?')) return;
-  localStorage.removeItem('qbs_reviews');
-  renderAdminReviews();
+  await fetch(`${API}?action=yorum_temizle`, { method: 'POST' });
+  for (const r of DEFAULT_REVIEWS) {
+    await fetch(`${API}?action=yorum_ekle`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(r)
+    });
+  }
+  await renderAdminReviews();
   toast('✓ Varsayılan yorumlara döndü');
 }
 
@@ -1478,9 +1463,10 @@ async function autoGenerate(s) {
     const text = await callAI(prompt, model);
     otoLastText = text;
 
-    const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
-    posts.push({ id: Date.now().toString(), platform: 'site', text, date: new Date().toLocaleDateString('tr-TR'), model: modelNames[model] });
-    localStorage.setItem('qbs_posts', JSON.stringify(posts));
+    await fetch(`${API}?action=post_ekle`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ platform: 'site', text, topic, model: modelNames[model] })
+    });
 
     s.lastTs = Date.now();
     s.topicIdx = (s.topicIdx + 1) % OTO_TOPICS.length;
@@ -1493,7 +1479,7 @@ async function autoGenerate(s) {
     document.getElementById('otoPreviewText').textContent = text;
     renderOtoHistory(s);
     updateOtoUI(s);
-    renderPublishedPosts();
+    await renderPublishedPosts();
     statusEl.innerHTML = `✓ ${modelNames[model]} ile post üretildi ve siteye yayınlandı`;
     toast('✓ Otomatik post üretildi');
   } catch(e) {
@@ -1504,14 +1490,15 @@ async function autoGenerate(s) {
   }
 }
 
-function publishOtoPost() {
+async function publishOtoPost() {
   if (!otoLastText) return;
   const s = getOtoSettings();
   const platform = s.platformMode === 'rotate' ? OTO_PLATFORMS[(s.platIdx-1+OTO_PLATFORMS.length)%OTO_PLATFORMS.length] : s.platformMode;
-  const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
-  posts.push({ id: Date.now().toString(), platform, text: otoLastText, date: new Date().toLocaleDateString('tr-TR') });
-  localStorage.setItem('qbs_posts', JSON.stringify(posts));
-  renderPublishedPosts();
+  await fetch(`${API}?action=post_ekle`, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ platform, text: otoLastText })
+  });
+  await renderPublishedPosts();
   toast('✓ Post siteye yayınlandı');
 }
 
@@ -1548,10 +1535,10 @@ function renderOtoHistory(s) {
 }
 
 // ── INIT ─────────────────────────────────────────────
-function initApp() {
+async function initApp() {
   renderDashboard();
-  renderPublishedPosts();
-  renderAdminReviews();
+  await renderPublishedPosts();
+  await renderAdminReviews();
   initOtoPost();
   updateApiKeyUI();
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
@@ -1563,6 +1550,7 @@ const _origShowTab = showTab;
 showTab = function(tab, btn) {
   _origShowTab(tab, btn);
   if (tab === 'yorumlar') renderAdminReviews();
+  if (tab === 'posts') renderPublishedPosts();
   if (tab === 'otopost') { const s = getOtoSettings(); updateOtoUI(s); renderOtoHistory(s); }
 };
 

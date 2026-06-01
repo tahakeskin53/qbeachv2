@@ -1341,42 +1341,28 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // ── SUPABASE BAĞLANTISI ──────────────────────────────
-  const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
+  // ── MySQL API BAĞLANTISI ─────────────────────────────
+  const API = 'api.php';
 
   const sb = {
     async insert(table, data) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(data)
+      const actionMap = { musteri: 'musteri_ekle', rezervasyon: 'rezervasyon_ekle', doluluk_kaydi: 'doluluk_kaydet', urun: 'urun_ekle' };
+      const res = await fetch(`${API}?action=${actionMap[table]}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
       });
       return res.json();
     },
     async select(table, params = '') {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
-      });
+      const actionMap = { urun: 'urun_listele', doluluk_kaydi: 'doluluk_getir', rezervasyon: 'rezervasyon_listele' };
+      const p = new URLSearchParams(params);
+      const kat = p.get('kategori_id') ? `&kategori_id=${p.get('kategori_id').replace('eq.', '')}` : '';
+      const res = await fetch(`${API}?action=${actionMap[table]}${kat}`);
       return res.json();
     },
     async update(table, data, match) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+      const id = match.split('eq.')[1];
+      const res = await fetch(`${API}?action=rezervasyon_guncelle&id=${id}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
       });
       return res.json();
     }
@@ -1608,25 +1594,31 @@ async function submitRezervasyon() {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${color}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
   }
 
-  function renderReviews() {
-    const saved = localStorage.getItem('qbs_reviews');
-    const reviews = (saved ? JSON.parse(saved) : null) || DEFAULT_REVIEWS;
+  async function renderReviews() {
     const track = document.getElementById('reviewsTrack');
     const dotsEl = document.getElementById('reviewDots');
     if (!track) return;
 
+    let reviews = await fetch(`${API}?action=yorum_listele`).then(r => r.json()).catch(() => []);
+    if (!Array.isArray(reviews) || !reviews.length) reviews = DEFAULT_REVIEWS;
+
     track.innerHTML = reviews.map(r => {
-      const stars = [1,2,3,4,5].map(i => starSVG(i <= r.rating)).join('');
+      const name = r.ad || r.name || '';
+      const city = r.sehir || r.city || '';
+      const rating = parseInt(r.puan || r.rating || 5);
+      const text = r.metin || r.text || '';
+      const date = r.tarih_str || r.date || '';
+      const stars = [1,2,3,4,5].map(i => starSVG(i <= rating)).join('');
       return `<div class="review-card" style="flex:0 0 calc(33.33% - 16px);background:rgba(201,149,42,0.06);border:1px solid rgba(201,149,42,0.14);padding:36px 32px;position:relative;min-width:300px;">
         <div style="position:absolute;top:24px;right:28px;opacity:0.12;font-size:64px;line-height:1;font-family:Georgia,serif;color:var(--gold);">"</div>
         <div style="display:flex;gap:2px;margin-bottom:18px;">${stars}</div>
-        <p style="font-size:13px;line-height:1.85;color:rgba(255,248,239,0.75);margin-bottom:24px;font-style:italic;">"${r.text}"</p>
+        <p style="font-size:13px;line-height:1.85;color:rgba(255,248,239,0.75);margin-bottom:24px;font-style:italic;">"${text}"</p>
         <div style="border-top:1px solid rgba(201,149,42,0.1);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--white);">${r.name}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-top:2px;">${r.city}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--white);">${name}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-top:2px;">${city}</div>
           </div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;">${r.date}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;">${date}</div>
         </div>
       </div>`;
     }).join('');
@@ -1685,30 +1677,28 @@ async function submitRezervasyon() {
   }
 
   renderReviews();
-  window.addEventListener('storage', e => { if (e.key === 'qbs_reviews') renderReviews(); });
   window.addEventListener('resize', () => { reviewGo(0); });
 
   // ── Posts from admin ────────────────────────────────
-  function renderPosts() {
-    const posts = JSON.parse(localStorage.getItem('qbs_posts') || '[]');
+  async function renderPosts() {
     const section = document.getElementById('posts-section');
     const grid = document.getElementById('posts-grid');
-    if (!posts.length) { section.style.display = 'none'; return; }
+    const posts = await fetch(`${API}?action=post_listele`).then(r => r.json()).catch(() => []);
+    if (!Array.isArray(posts) || !posts.length) { section.style.display = 'none'; return; }
     section.style.display = 'block';
-    const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵' };
-    grid.innerHTML = posts.slice().reverse().map(p => `
+    const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵', site:'✦' };
+    grid.innerHTML = posts.map(p => `
       <div style="background:#1a140d;border:1px solid rgba(201,149,42,0.1);padding:28px;position:relative;">
         <div style="border-top:2px solid var(--red);position:absolute;top:0;left:0;right:0;"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||''} ${p.platform}</span>
-          <span style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;">${p.date}</span>
+          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||'✦'} ${p.platform}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:1px;">${p.created_at ? p.created_at.substring(0,10) : ''}</span>
         </div>
         <p style="font-size:12px;line-height:1.8;color:rgba(255,255,255,0.7);white-space:pre-wrap;">${p.text}</p>
       </div>
     `).join('');
   }
   renderPosts();
-  window.addEventListener('storage', e => { if (e.key === 'qbs_posts') renderPosts(); });
 </script>
 
 

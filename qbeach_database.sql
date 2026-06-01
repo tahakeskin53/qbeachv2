@@ -107,6 +107,19 @@ CREATE TABLE site_posts (
   created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ------------------------------------------------------------
+-- 9. SİTE YORUMLARI  (TripAdvisor'dan kopyalanıp admin'den yönetilir)
+-- ------------------------------------------------------------
+CREATE TABLE site_yorum (
+  yorum_id   INT          PRIMARY KEY AUTO_INCREMENT,
+  ad         VARCHAR(100) NOT NULL,
+  sehir      VARCHAR(100) NULL,
+  puan       INT          DEFAULT 5,
+  metin      TEXT         NOT NULL,
+  tarih_str  VARCHAR(50)  NULL COMMENT 'Görüntülenecek tarih metni, örn: Ağustos 2024',
+  eklenme    DATETIME     DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================================
 --  ÖRNEK VERİLER
 -- ============================================================
@@ -162,6 +175,14 @@ INSERT INTO rezervasyon (musteri_id, alan_id, tarih, saat, kisi_sayisi, durum, n
 INSERT INTO doluluk_kaydi (alan_id, doluluk_yuzdesi) VALUES
   (1, 84),
   (2, 62);
+
+INSERT INTO site_yorum (ad, sehir, puan, metin, tarih_str) VALUES
+  ('Ayşe K.',         'İstanbul, Türkiye', 5, 'Hem deniz manzarası hem de yemekler muhteşemdi. Levrek ızgarası hayatımda yediğim en taze balıktı. Gün batımında kokteylinizi yudumlarken dünyanın en güzel yerinde olduğunuzu hissediyorsunuz. Kesinlikle tekrar geleceğiz.', 'Ağustos 2024'),
+  ('James & Sarah T.','London, UK',        5, 'Absolutely stunning location and exceptional food. The seafood platter was incredibly fresh and the service was impeccable. The sunset view from our table was breathtaking. One of the best dining experiences we had in Turkey!', 'Temmuz 2024'),
+  ('Mehmet A.',       'Ankara, Türkiye',   5, 'Harika bir mekan! Plaj alanı tertemiz ve şık, yemekler ise lezzetli. Özellikle Surf & Turf''ü mutlaka deneyin. Personel çok ilgili ve profesyonel. Side''ye her gelişimizde Q Beach''e uğruyoruz.', 'Eylül 2024'),
+  ('Klaus M.',        'München, Germany',  5, 'Ein wunderschönes Restaurant direkt am Meer. Das Essen war hervorragend, besonders der Oktopus-Grill. Die Atmosphäre beim Sonnenuntergang ist einfach unvergesslich.', 'Ekim 2024'),
+  ('Elif & Burak S.', 'İzmir, Türkiye',    5, 'Yıllardır bu sahile geliyoruz ama Q Beach''i keşfetmek bambaşka bir deneyim oldu. Kokteylleri, özellikle Q Signature, eşsiz. Gün batımı saatlerinde masa bulmak zor olabiliyor, mutlaka rezervasyon yaptırın!', 'Temmuz 2024'),
+  ('Marie-Claire D.', 'Paris, France',     5, 'Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L''ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.', 'Ağustos 2024');
 
 INSERT INTO site_posts (platform, text, topic, model) VALUES
   ('instagram',
