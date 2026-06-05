@@ -772,33 +772,33 @@
 <div id="toast">✓ İşlem tamamlandı</div>
 
 <script>
-// ── MySQL API BAĞLANTISI ──────────────────────────────
-const API = 'api.php';
+// ── SUPABASE BAĞLANTISI ──────────────────────────────
+const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
+const SB_HEADS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+const SB_READ  = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
 
 const sb = {
   async query(table, params = '') {
-    const actionMap = { rezervasyon: 'rezervasyon_listele', doluluk_kaydi: 'doluluk_getir', urun: 'urun_listele', menu_kategori: 'kategori_listele' };
-    const res = await fetch(`${API}?action=${actionMap[table] || table + '_listele'}`);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, { headers: SB_READ });
     return res.json();
   },
   async insert(table, data) {
-    const actionMap = { musteri: 'musteri_ekle', rezervasyon: 'rezervasyon_ekle', doluluk_kaydi: 'doluluk_kaydet', urun: 'urun_ekle', menu_kategori: 'kategori_ekle' };
-    const res = await fetch(`${API}?action=${actionMap[table]}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST', headers: SB_HEADS, body: JSON.stringify(data)
     });
     return res.json();
   },
   async patch(table, data, match) {
-    const id = match.split('eq.')[1];
-    const res = await fetch(`${API}?action=rezervasyon_guncelle&id=${id}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+      method: 'PATCH', headers: SB_HEADS, body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
   },
   async del(table, match) {
-    const id = match.split('eq.')[1];
-    const actionMap = { rezervasyon: 'rezervasyon_sil', urun: 'urun_sil' };
-    const res = await fetch(`${API}?action=${actionMap[table]}&id=${id}`, { method: 'POST' });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+      method: 'DELETE', headers: SB_READ
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
   }
 };
@@ -1236,8 +1236,8 @@ async function publishPost() {
   const platform = document.getElementById('ai-result-card').dataset.platform || document.getElementById('ai-platform').value;
   const model = document.getElementById('ai-result-card').dataset.model || document.getElementById('ai-model').value;
   if (!text) return;
-  await fetch(`${API}?action=post_ekle`, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
+  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
+    method: 'POST', headers: SB_HEADS,
     body: JSON.stringify({ platform, text, model })
   });
   document.getElementById('publish-ok').style.display = 'block';
@@ -1252,14 +1252,14 @@ function copyPost() {
 
 async function clearPosts() {
   if (!confirm('Tüm postlar silinsin mi?')) return;
-  await fetch(`${API}?action=post_temizle`, { method: 'POST' });
+  await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=gt.0`, { method: 'DELETE', headers: SB_READ });
   await renderPublishedPosts();
   toast('✓ Postlar silindi');
 }
 
 async function renderPublishedPosts() {
   const container = document.getElementById('published-posts-list');
-  const posts = await fetch(`${API}?action=post_listele`).then(r => r.json()).catch(() => []);
+  const posts = await fetch(`${SUPABASE_URL}/rest/v1/site_posts?select=id,platform,text,topic,model,created_at&order=created_at.desc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
   if (!Array.isArray(posts) || !posts.length) {
     container.innerHTML = '<div class="empty-state" id="no-posts">Henüz yayınlanan post yok.</div>';
     return;
@@ -1280,7 +1280,7 @@ async function renderPublishedPosts() {
 }
 
 async function deletePost(id) {
-  await fetch(`${API}?action=post_sil&id=${id}`, { method: 'POST' });
+  await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
   await renderPublishedPosts();
   toast('✓ Post silindi');
 }
@@ -1299,7 +1299,7 @@ async function renderAdminReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
   el.innerHTML = '<div class="empty-state">Yükleniyor…</div>';
-  const reviews = await fetch(`${API}?action=yorum_listele`).then(r => r.json()).catch(() => []);
+  const reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
   if (!Array.isArray(reviews) || !reviews.length) {
     el.innerHTML = '<div class="empty-state">Henüz yorum yok.</div>';
     return;
@@ -1328,8 +1328,8 @@ async function addReview() {
   const metin = document.getElementById('rvText').value.trim();
   const tarih_str = document.getElementById('rvDate').value.trim();
   if (!ad || !metin) { alert('İsim ve yorum metni zorunludur.'); return; }
-  await fetch(`${API}?action=yorum_ekle`, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
+  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
+    method: 'POST', headers: SB_HEADS,
     body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'}) })
   });
   await renderAdminReviews();
@@ -1340,18 +1340,17 @@ async function addReview() {
 
 async function deleteReview(id) {
   if (!confirm('Bu yorumu silmek istiyor musunuz?')) return;
-  await fetch(`${API}?action=yorum_sil&id=${id}`, { method: 'POST' });
+  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
   await renderAdminReviews();
   toast('✓ Yorum silindi');
 }
 
 async function resetReviews() {
   if (!confirm('Tüm yorumlar silinip varsayılanlara dönülsün mü?')) return;
-  await fetch(`${API}?action=yorum_temizle`, { method: 'POST' });
+  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=gt.0`, { method: 'DELETE', headers: SB_READ });
   for (const r of DEFAULT_REVIEWS) {
-    await fetch(`${API}?action=yorum_ekle`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(r)
+    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
+      method: 'POST', headers: SB_HEADS, body: JSON.stringify(r)
     });
   }
   await renderAdminReviews();
@@ -1463,8 +1462,8 @@ async function autoGenerate(s) {
     const text = await callAI(prompt, model);
     otoLastText = text;
 
-    await fetch(`${API}?action=post_ekle`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
+    await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
+      method: 'POST', headers: SB_HEADS,
       body: JSON.stringify({ platform: 'site', text, topic, model: modelNames[model] })
     });
 
@@ -1494,8 +1493,8 @@ async function publishOtoPost() {
   if (!otoLastText) return;
   const s = getOtoSettings();
   const platform = s.platformMode === 'rotate' ? OTO_PLATFORMS[(s.platIdx-1+OTO_PLATFORMS.length)%OTO_PLATFORMS.length] : s.platformMode;
-  await fetch(`${API}?action=post_ekle`, {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
+  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
+    method: 'POST', headers: SB_HEADS,
     body: JSON.stringify({ platform, text: otoLastText })
   });
   await renderPublishedPosts();
