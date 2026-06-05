@@ -1398,6 +1398,23 @@
     btn.disabled = true;
     btn.textContent = 'Gönderiliyor...';
 
+    // Aynı telefonla aynı tarihte ve saatte başka aktif rezervasyon var mı kontrolü
+    try {
+      const musteriler = await sb.select('musteri', `select=musteri_id&telefon=eq.${encodeURIComponent(phone)}`);
+      if (Array.isArray(musteriler) && musteriler.length > 0) {
+        const musteriIds = musteriler.map(m => m.musteri_id);
+        const existing = await sb.select('rezervasyon', `select=rezervasyon_id&musteri_id=in.(${musteriIds.join(',')})&tarih=eq.${date}&saat=eq.${time}&durum=neq.iptal`);
+        if (Array.isArray(existing) && existing.length > 0) {
+          alert('Bu tarih ve saatte zaten aktif bir rezervasyonunuz bulunmaktadır.');
+          btn.disabled = false;
+          btn.textContent = origText;
+          return;
+        }
+      }
+    } catch(err) {
+      console.warn('Çift rezervasyon kontrolü başarısız oldu, yine de devam ediliyor:', err);
+    }
+
     try {
       const musteriData = await sb.insert('musteri', {
         ad: name,

@@ -816,6 +816,22 @@ async function addRezv() {
   const date = document.getElementById('nrDate').value;
   const time = document.getElementById('nrTime').value;
   if (!name || !date || !time) { alert('Ad, tarih ve saat gerekli.'); return; }
+
+  // Aynı telefonla aynı tarihte ve saatte başka aktif rezervasyon var mı kontrolü
+  try {
+    const musteriler = await sb.query('musteri', `select=musteri_id&telefon=eq.${encodeURIComponent(phone)}`);
+    if (Array.isArray(musteriler) && musteriler.length > 0) {
+      const musteriIds = musteriler.map(m => m.musteri_id);
+      const existing = await sb.query('rezervasyon', `select=rezervasyon_id&musteri_id=in.(${musteriIds.join(',')})&tarih=eq.${date}&saat=eq.${time}&durum=neq.iptal`);
+      if (Array.isArray(existing) && existing.length > 0) {
+        alert('Bu müşterinin aynı tarih ve saatte zaten aktif bir rezervasyonu bulunmaktadır.');
+        return;
+      }
+    }
+  } catch(err) {
+    console.warn('Çift rezervasyon kontrolü başarısız oldu, yine de devam ediliyor:', err);
+  }
+
   try {
     const musteriData = await sb.insert('musteri', { ad: name, soyad: '', telefon: phone, email: '' });
     const musteri_id = musteriData[0].musteri_id;
