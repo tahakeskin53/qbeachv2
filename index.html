@@ -1589,9 +1589,9 @@
       sonucEl.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:12px;text-align:center;">Bu telefon numarasına ait rezervasyon bulunamadı.</p>';
       return;
     }
-    const musteriId = musteriler[0].musteri_id;
+    const musteriIds = musteriler.map(m => m.musteri_id);
     const ad = musteriler[0].ad + ' ' + (musteriler[0].soyad || '');
-    const rezler = await sb.select('rezervasyon', `select=rezervasyon_id,tarih,saat,kisi_sayisi,durum,notlar,alan_id&musteri_id=eq.${musteriId}&order=tarih.asc`);
+    const rezler = await sb.select('rezervasyon', `select=rezervasyon_id,tarih,saat,kisi_sayisi,durum,notlar,alan_id&musteri_id=in.(${musteriIds.join(',')})&order=tarih.asc`);
     if (!Array.isArray(rezler) || !rezler.length) {
       sonucEl.innerHTML = '<p style="color:rgba(255,255,255,0.35);font-size:12px;text-align:center;">Rezervasyon bulunamadı.</p>';
       return;
