@@ -933,21 +933,6 @@
           <span id="saatBilgiText">🕘 Restoran çalışma saatleri: <strong style="color:rgba(255,255,255,0.85);">09:00 – 00:00</strong> · Salı – Pazar</span>
         </div>
 
-        <!-- Plaj özel seçenekler -->
-        <div id="plajEkstra" style="display:none;margin-bottom:18px;">
-          <span class="form-section-label" style="margin-bottom:10px;">Plaj Tercihi</span>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <button class="type-btn active" id="sezlongBtn" onclick="setPlajTip('sezlong')" style="font-size:10px;padding:10px;">Şezlong &amp; Şemsiye</button>
-            <button class="type-btn" id="vipBtn" onclick="setPlajTip('vip')" style="font-size:10px;padding:10px;">VIP Koltuk Alanı</button>
-          </div>
-          <div style="margin-top:10px;">
-            <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Şezlong / Koltuk Adedi</label>
-            <select id="rSezlong" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:12px 16px;font-family:'Montserrat',sans-serif;font-size:12px;outline:none;">
-              <option>1 Adet</option><option selected="">2 Adet</option>
-              <option>3 Adet</option><option>4 Adet</option><option>4+ Adet</option>
-            </select>
-          </div>
-        </div>
 
         <div class="form-row">
           <div class="form-group">
@@ -1372,7 +1357,6 @@
 
   // ── Reservation type ────────────────────────────────
   let currentType = 'restoran';
-  let currentPlajTip = 'sezlong';
   const RESTORAN_SAATLER = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30'];
   const PLAJ_SAATLER = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
   function fillSaatler(saatler) {
@@ -1384,7 +1368,6 @@
     currentType = type;
     document.getElementById('typeRestoran').classList.toggle('active', type === 'restoran');
     document.getElementById('typePlaj').classList.toggle('active', type === 'plaj');
-    document.getElementById('plajEkstra').style.display = type === 'plaj' ? 'block' : 'none';
     if (type === 'restoran') {
       fillSaatler(RESTORAN_SAATLER);
       document.getElementById('saatBilgiText').innerHTML = 'Restoran calisma saatleri: <strong style="color:rgba(255,255,255,0.85);">09:00 - 00:00</strong> · Sali - Pazar';
@@ -1396,11 +1379,6 @@
       document.getElementById('saatBilgi').style.borderLeftColor = 'var(--sand)';
       document.getElementById('occasionGroup').style.display = 'none';
     }
-  }
-  function setPlajTip(tip) {
-    currentPlajTip = tip;
-    document.getElementById('sezlongBtn').classList.toggle('active', tip === 'sezlong');
-    document.getElementById('vipBtn').classList.toggle('active', tip === 'vip');
   }
   fillSaatler(RESTORAN_SAATLER);
 
