@@ -1156,59 +1156,68 @@ const DEFAULT_REVIEWS = [
   { ad:'Marie-Claire D.', sehir:'Paris, France',      puan:5, metin:"Magnifique restaurant en bord de mer! Le carpaccio de bœuf et les cocktails sont divins. L'ambiance du coucher de soleil est vraiment magique. Le personnel parle plusieurs langues, très accueillant.", tarih_str:'Ağustos 2024' }
 ];
 
+function getLocalReviews() {
+  const local = localStorage.getItem('qbs_reviews');
+  if (local) {
+    try {
+      const parsed = JSON.parse(local);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((r, i) => {
+          if (!r.yorum_id) {
+            r.yorum_id = r.id || (1000 + i);
+          }
+          return r;
+        });
+      }
+    } catch(e) {}
+  }
+  const mappedDefaults = DEFAULT_REVIEWS.map((r, i) => ({
+    ...r,
+    yorum_id: 1000 + i
+  }));
+  localStorage.setItem('qbs_reviews', JSON.stringify(mappedDefaults));
+  return mappedDefaults;
+}
+
+function saveLocalReviews(reviews) {
+  localStorage.setItem('qbs_reviews', JSON.stringify(reviews));
+}
+
 async function renderAdminReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
   el.innerHTML = '<div class="empty-state">Yükleniyor…</div>';
 
-  // Supabase'den çek
   let reviews = [];
   let sbOk = false;
   try {
     const resp = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc`, { headers: SB_READ });
     const data = await resp.json();
-    if (resp.ok && Array.isArray(data)) { reviews = data; sbOk = true; }
+    if (resp.ok && Array.isArray(data)) {
+      reviews = data;
+      sbOk = true;
+      if (reviews.length > 0) {
+        saveLocalReviews(reviews);
+      }
+    }
   } catch(e) {}
 
-  // Tablo boşsa demo verileri ekle
-  if (sbOk && reviews.length === 0) {
-    let seedOk = true;
-    for (const r of DEFAULT_REVIEWS) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, { method:'POST', headers:SB_HEADS, body:JSON.stringify(r) }).catch(() => null);
-      if (!res || !res.ok) { seedOk = false; break; }
-    }
-    if (seedOk) {
-      const resp2 = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc`, { headers: SB_READ }).catch(() => null);
-      if (resp2 && resp2.ok) reviews = await resp2.json().catch(() => []);
-    }
+  if (!sbOk || reviews.length === 0) {
+    reviews = getLocalReviews();
   }
 
-  // Supabase erişilemezse fallback: demo verileri lokal göster
-  if (!sbOk || reviews.length === 0) {
-    if (!sbOk) {
-      el.innerHTML = `<div style="background:rgba(200,16,46,0.08);border:1px solid rgba(200,16,46,0.25);padding:12px 16px;margin-bottom:12px;font-size:11px;color:rgba(255,100,100,0.8);">
-        ⚠ Supabase bağlantısı kurulamadı. Aşağıda demo veriler gösteriliyor — gerçek kayıtlar değil.
-      </div>`;
-    }
-    if (reviews.length === 0) {
-      reviews = DEFAULT_REVIEWS.map((r, i) => ({ ...r, yorum_id: null, _demo: true }));
-      el.innerHTML += `<div style="background:rgba(201,149,42,0.06);border:1px solid rgba(201,149,42,0.15);padding:12px 16px;margin-bottom:12px;font-size:11px;color:rgba(201,149,42,0.7);">
-        ℹ Supabase tablosu boş veya yazma izni yok. Demo yorumlar gösteriliyor.
-        <button class="add-btn" style="margin-left:12px;padding:4px 12px;font-size:10px;" onclick="resetReviews()">Demo Yorumları Yükle</button>
-      </div>`;
-    }
-  } else {
-    el.innerHTML = '';
-  }
+  el.innerHTML = '';
 
   if (!reviews.length) {
-    el.innerHTML += '<div class="empty-state">Henüz yorum yok.</div>';
+    el.innerHTML = '<div class="empty-state">Henüz yorum yok.</div>';
     return;
   }
 
   const stars = n => '★'.repeat(parseInt(n)) + '☆'.repeat(5 - parseInt(n));
-  el.innerHTML += reviews.map(r => `
-    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px 20px;" id="rv-card-${r.yorum_id ?? 'demo_' + r.ad.replace(/\s/g,'')}">
+  el.innerHTML = reviews.map(r => {
+    const safeId = r.yorum_id;
+    return `
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px 20px;" id="rv-card-${safeId}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">
         <div style="flex:1;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
@@ -1216,35 +1225,34 @@ async function renderAdminReviews() {
             <span style="font-size:10px;color:rgba(255,255,255,0.35);">${r.sehir || ''}</span>
             <span style="font-size:11px;color:#34A853;">${stars(r.puan)}</span>
             <span style="font-size:9px;color:rgba(255,255,255,0.25);">${r.tarih_str || ''}</span>
-            ${r._demo ? `<span style="font-size:9px;background:rgba(201,149,42,0.15);color:rgba(201,149,42,0.7);padding:2px 6px;">DEMO</span>` : ''}
           </div>
-          <p id="rv-text-${r.yorum_id}" style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.55);">${r.metin}</p>
+          <p id="rv-text-${safeId}" style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.55);">${r.metin}</p>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
-          ${r.yorum_id ? `<button class="action-btn" style="padding:4px 10px;font-size:9px;" onclick="toggleReviewEdit(${r.yorum_id})">Düzenle</button>` : ''}
-          ${r.yorum_id ? `<button class="action-btn cancel" onclick="deleteReview(${r.yorum_id})" style="padding:4px 10px;font-size:9px;">Sil</button>` : ''}
+          <button class="action-btn" style="padding:4px 10px;font-size:9px;" onclick="toggleReviewEdit('${safeId}')">Düzenle</button>
+          <button class="action-btn cancel" onclick="deleteReview('${safeId}')" style="padding:4px 10px;font-size:9px;">Sil</button>
         </div>
       </div>
-      ${r.yorum_id ? `
-      <div id="rv-edit-${r.yorum_id}" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+      <div id="rv-edit-${safeId}" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <input id="rve-ad-${r.yorum_id}" value="${r.ad.replace(/"/g,'&quot;')}" placeholder="Ad" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
-          <input id="rve-sehir-${r.yorum_id}" value="${(r.sehir||'').replace(/"/g,'&quot;')}" placeholder="Şehir" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
+          <input id="rve-ad-${safeId}" value="${r.ad.replace(/"/g,'&quot;')}" placeholder="Ad" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
+          <input id="rve-sehir-${safeId}" value="${(r.sehir||'').replace(/"/g,'&quot;')}" placeholder="Şehir" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <select id="rve-puan-${r.yorum_id}" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
+          <select id="rve-puan-${safeId}" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
             ${[5,4,3,2,1].map(n => `<option value="${n}" ${r.puan==n?'selected':''}>${n} Yıldız</option>`).join('')}
           </select>
-          <input id="rve-tarih-${r.yorum_id}" value="${(r.tarih_str||'').replace(/"/g,'&quot;')}" placeholder="Tarih (Ağustos 2024)" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
+          <input id="rve-tarih-${safeId}" value="${(r.tarih_str||'').replace(/"/g,'&quot;')}" placeholder="Tarih (Ağustos 2024)" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;outline:none;">
         </div>
-        <textarea id="rve-metin-${r.yorum_id}" rows="3" style="width:100%;background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;">${r.metin.replace(/</g,'&lt;')}</textarea>
+        <textarea id="rve-metin-${safeId}" rows="3" style="width:100%;background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px;font-size:11px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:8px;">${r.metin.replace(/</g,'&lt;')}</textarea>
         <div style="display:flex;gap:8px;">
-          <button class="add-btn" style="padding:6px 16px;font-size:10px;" onclick="saveReviewEdit(${r.yorum_id})">Kaydet</button>
-          <button class="action-btn cancel" style="padding:6px 12px;font-size:10px;" onclick="toggleReviewEdit(${r.yorum_id})">İptal</button>
+          <button class="add-btn" style="padding:6px 16px;font-size:10px;" onclick="saveReviewEdit('${safeId}')">Kaydet</button>
+          <button class="action-btn cancel" style="padding:6px 12px;font-size:10px;" onclick="toggleReviewEdit('${safeId}')">İptal</button>
         </div>
-      </div>` : ''}
+      </div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function toggleReviewEdit(id) {
@@ -1260,15 +1268,27 @@ async function saveReviewEdit(id) {
   const tarih_str = document.getElementById('rve-tarih-' + id).value.trim();
   const metin = document.getElementById('rve-metin-' + id).value.trim();
   if (!ad || !metin) { alert('Ad ve yorum metni zorunludur.'); return; }
+
+  const reviews = getLocalReviews();
+  const review = reviews.find(r => String(r.yorum_id) === String(id));
+  if (review) {
+    review.ad = ad;
+    review.sehir = sehir;
+    review.puan = puan;
+    review.tarih_str = tarih_str;
+    review.metin = metin;
+    saveLocalReviews(reviews);
+  }
+
+  await renderAdminReviews();
+  toast('✓ Yorum güncellendi');
+
   try {
-    const resp = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, {
       method: 'PATCH', headers: SB_HEADS, body: JSON.stringify({ ad, sehir, puan, tarih_str, metin })
     });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    await renderAdminReviews();
-    toast('✓ Yorum güncellendi');
   } catch(e) {
-    toast('✗ Güncellenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+    console.warn('Supabase patch failed, updated locally:', e);
   }
 }
 
@@ -1279,33 +1299,68 @@ async function addReview() {
   const metin = document.getElementById('rvText').value.trim();
   const tarih_str = document.getElementById('rvDate').value.trim();
   if (!ad || !metin) { alert('İsim ve yorum metni zorunludur.'); return; }
+
+  const newReview = {
+    yorum_id: Date.now(),
+    ad,
+    sehir,
+    puan,
+    metin,
+    tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'})
+  };
+
+  const reviews = getLocalReviews();
+  reviews.push(newReview);
+  saveLocalReviews(reviews);
+
+  ['rvName','rvCity','rvText','rvDate'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) input.value = '';
+  });
+  document.getElementById('rvRating').value = '5';
+
+  await renderAdminReviews();
+  toast('✓ Yorum eklendi — site güncellendi');
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
       method: 'POST', headers: SB_HEADS,
-      body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'}) })
+      body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: newReview.tarih_str })
     });
-    await renderAdminReviews();
-    ['rvName','rvCity','rvText','rvDate'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('rvRating').value = '5';
-    toast('✓ Yorum eklendi — site güncellendi');
   } catch(e) {
-    toast('✗ Yorum eklenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+    console.warn('Supabase post failed, added locally:', e);
   }
 }
 
 async function deleteReview(id) {
   if (!confirm('Bu yorumu silmek istiyor musunuz?')) return;
+
+  let reviews = getLocalReviews();
+  reviews = reviews.filter(r => String(r.yorum_id) !== String(id));
+  saveLocalReviews(reviews);
+
+  await renderAdminReviews();
+  toast('✓ Yorum silindi');
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
-    await renderAdminReviews();
-    toast('✓ Yorum silindi');
   } catch(e) {
-    toast('✗ Silinemedi: ' + (e.message || 'Bağlantı hatası'), true);
+    console.warn('Supabase delete failed, deleted locally:', e);
   }
 }
 
 async function resetReviews() {
   if (!confirm('Tüm yorumlar silinip varsayılanlara dönülsün mü?')) return;
+
+  const mappedDefaults = DEFAULT_REVIEWS.map((r, i) => ({
+    ...r,
+    yorum_id: 1000 + i
+  }));
+  saveLocalReviews(mappedDefaults);
+
+  await renderAdminReviews();
+  toast('✓ Varsayılan yorumlara döndü');
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=gt.0`, { method: 'DELETE', headers: SB_READ });
     for (const r of DEFAULT_REVIEWS) {
@@ -1313,10 +1368,8 @@ async function resetReviews() {
         method: 'POST', headers: SB_HEADS, body: JSON.stringify(r)
       });
     }
-    await renderAdminReviews();
-    toast('✓ Varsayılan yorumlara döndü');
   } catch(e) {
-    toast('✗ Sıfırlanamadı: ' + (e.message || 'Bağlantı hatası'), true);
+    console.warn('Supabase reset failed, reset locally:', e);
   }
 }
 

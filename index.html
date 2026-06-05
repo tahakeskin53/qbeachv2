@@ -1477,7 +1477,12 @@
     if (!track) return;
 
     let reviews = await sb.select('site_yorum', 'select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc').catch(() => []);
-    if (!Array.isArray(reviews) || !reviews.length) reviews = DEFAULT_REVIEWS;
+    if (!Array.isArray(reviews) || !reviews.length) {
+      const local = localStorage.getItem('qbs_reviews');
+      reviews = local ? JSON.parse(local) : DEFAULT_REVIEWS;
+    } else {
+      localStorage.setItem('qbs_reviews', JSON.stringify(reviews));
+    }
 
     track.innerHTML = reviews.map(r => {
       const name = r.ad || r.name || '';
