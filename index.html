@@ -1471,7 +1471,7 @@
     const dotsEl = document.getElementById('reviewDots');
     if (!track) return;
 
-    let reviews = await fetch(`${API}?action=yorum_listele`).then(r => r.json()).catch(() => []);
+    let reviews = await sb.select('site_yorum', 'select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc').catch(() => []);
     if (!Array.isArray(reviews) || !reviews.length) reviews = DEFAULT_REVIEWS;
 
     track.innerHTML = reviews.map(r => {

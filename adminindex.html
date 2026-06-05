@@ -704,11 +704,12 @@ function showTab(tab, btn) {
 }
 
 // ── TOAST ─────────────────────────────────────────────
-function toast(msg) {
+function toast(msg, isError = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  t.style.background = isError ? '#7a1515' : '';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => { t.classList.remove('show'); t.style.background = ''; }, isError ? 4000 : 2500);
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
@@ -789,19 +790,23 @@ async function addRezv() {
   const date = document.getElementById('nrDate').value;
   const time = document.getElementById('nrTime').value;
   if (!name || !date || !time) { alert('Ad, tarih ve saat gerekli.'); return; }
-  const musteriData = await sb.insert('musteri', { ad: name, soyad: '', telefon: phone, email: '' });
-  const musteri_id = musteriData[0].musteri_id;
-  const alan_id = document.getElementById('nrType').value === 'plaj' ? 2 : 1;
-  await sb.insert('rezervasyon', {
-    musteri_id, alan_id, tarih: date, saat: time,
-    kisi_sayisi: parseInt(document.getElementById('nrGuests').value),
-    durum: 'onaylı',
-    notlar: document.getElementById('nrNotes').value
-  });
-  document.getElementById('addRezvCard').style.display = 'none';
-  renderRezv(currentFilter);
-  renderDashboard();
-  toast('✓ Rezervasyon eklendi');
+  try {
+    const musteriData = await sb.insert('musteri', { ad: name, soyad: '', telefon: phone, email: '' });
+    const musteri_id = musteriData[0].musteri_id;
+    const alan_id = document.getElementById('nrType').value === 'plaj' ? 2 : 1;
+    await sb.insert('rezervasyon', {
+      musteri_id, alan_id, tarih: date, saat: time,
+      kisi_sayisi: parseInt(document.getElementById('nrGuests').value),
+      durum: 'onaylı',
+      notlar: document.getElementById('nrNotes').value
+    });
+    document.getElementById('addRezvCard').style.display = 'none';
+    renderRezv(currentFilter);
+    renderDashboard();
+    toast('✓ Rezervasyon eklendi');
+  } catch(e) {
+    toast('✗ Rezervasyon eklenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 async function setStatus(id, durum) {
@@ -995,20 +1000,28 @@ async function addMenuItem() {
   const desc = document.getElementById('miDesc').value.trim();
   const tag = document.getElementById('miTag').value.trim();
   if (!name || !price) { alert('Ürün adı ve fiyat gerekli.'); return; }
-  await sb.insert('urun', { urun_adi: name, fiyat: price, kategori_id: catIds[cat], aciklama: desc, etiket: tag, aktif: true });
-  renderMenu();
-  document.getElementById('miName').value = '';
-  document.getElementById('miPrice').value = '';
-  document.getElementById('miDesc').value = '';
-  document.getElementById('miTag').value = '';
-  toast('✓ Ürün eklendi');
+  try {
+    await sb.insert('urun', { urun_adi: name, fiyat: price, kategori_id: catIds[cat], aciklama: desc, etiket: tag, aktif: true });
+    renderMenu();
+    document.getElementById('miName').value = '';
+    document.getElementById('miPrice').value = '';
+    document.getElementById('miDesc').value = '';
+    document.getElementById('miTag').value = '';
+    toast('✓ Ürün eklendi');
+  } catch(e) {
+    toast('✗ Ürün eklenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 async function delMenuItem(id) {
   if (!confirm('Ürünü silmek istiyor musunuz?')) return;
-  await sb.del('urun', `urun_id=eq.${id}`);
-  renderMenu();
-  toast('✓ Ürün silindi');
+  try {
+    await sb.del('urun', `urun_id=eq.${id}`);
+    renderMenu();
+    toast('✓ Ürün silindi');
+  } catch(e) {
+    toast('✗ Silinemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 function showEditMenuItem(id) {
@@ -1023,165 +1036,48 @@ async function saveEditMenuItem(id) {
   const desc = document.getElementById('ei-desc-' + id).value.trim();
   const tag = document.getElementById('ei-tag-' + id).value.trim();
   if (!name || !price) { alert('Ürün adı ve fiyat zorunludur.'); return; }
-  await sb.patch('urun', { urun_adi: name, fiyat: price, aciklama: desc, etiket: tag }, `urun_id=eq.${id}`);
-  renderMenu();
-  toast('✓ Ürün güncellendi');
+  try {
+    await sb.patch('urun', { urun_adi: name, fiyat: price, aciklama: desc, etiket: tag }, `urun_id=eq.${id}`);
+    renderMenu();
+    toast('✓ Ürün güncellendi');
+  } catch(e) {
+    toast('✗ Güncellenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 // ── MANUEL POST ──────────────────────────────────────
 async function addManualPost() {
   const text = document.getElementById('manual-post-text').value.trim();
   const platform = document.getElementById('manual-platform').value;
+  const topic = document.getElementById('manual-topic') ? document.getElementById('manual-topic').value.trim() : '';
   if (!text) { alert('Post metni boş olamaz.'); return; }
-  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
-    method: 'POST', headers: SB_HEADS,
-    body: JSON.stringify({ platform, text })
-  });
-  document.getElementById('manual-post-text').value = '';
-  const ok = document.getElementById('manual-publish-ok');
-  ok.style.display = 'block';
-  setTimeout(() => ok.style.display = 'none', 3000);
-  await renderPublishedPosts();
-  toast('✓ Post siteye yayınlandı');
-}
-
-function getApiKey(model) {
-  return localStorage.getItem('qbs_api_key_' + model) || '';
-}
-
-function saveAiKey(model) {
-  const inputMap = { claude:'apiKeyClaude', chatgpt:'apiKeyChatgpt', gemini:'apiKeyGemini' };
-  const el = document.getElementById(inputMap[model]);
-  if (!el) return;
-  const key = el.value.trim();
-  if (!key) { alert('API anahtarı boş olamaz.'); return; }
-  localStorage.setItem('qbs_api_key_' + model, key);
-  document.getElementById(inputMap[model]).value = '';
-  updateApiKeyUI();
-  toast('✓ ' + model + ' API anahtarı kaydedildi');
-}
-
-function clearAiKey(model) {
-  if (!confirm(model + ' API anahtarı silinsin mi?')) return;
-  localStorage.removeItem('qbs_api_key_' + model);
-  updateApiKeyUI();
-  toast('✓ Silindi');
-}
-
-function updateApiKeyUI() {
-  const models = ['claude','chatgpt','gemini'];
-  const statusEl = document.getElementById('apiKeyStatus');
-  const connected = models.filter(m => getApiKey(m));
-  if (statusEl) {
-    statusEl.textContent = connected.length ? '✓ Bağlı: ' + connected.join(', ') : 'Hiçbir model bağlı değil';
-    statusEl.style.color = connected.length ? 'var(--green)' : 'var(--muted)';
-  }
-  const statusMap = { claude:'claudeKeyStatus', chatgpt:'chatgptKeyStatus', gemini:'geminiKeyStatus' };
-  models.forEach(m => {
-    const el = document.getElementById(statusMap[m]);
-    const key = getApiKey(m);
-    if (el && key) el.innerHTML = `<span style="color:var(--green)">✓ Bağlı · ${key.substring(0,10)}…</span>`;
-  });
-}
-
-async function callAI(prompt, model) {
-  const key = getApiKey(model);
-  if (!key) throw new Error('API_KEY_MISSING:' + model);
-
-  if (model === 'claude') {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1024, messages:[{role:'user',content:prompt}] })
-    });
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
-    const data = await resp.json();
-    return data.content[0].text;
-  }
-
-  if (model === 'chatgpt') {
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'content-type':'application/json', 'Authorization':'Bearer '+key },
-      body: JSON.stringify({ model:'gpt-4o-mini', max_tokens:1024, messages:[{role:'user',content:prompt}] })
-    });
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
-    const data = await resp.json();
-    return data.choices[0].message.content;
-  }
-
-  if (model === 'gemini') {
-    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
-      method: 'POST',
-      headers: { 'content-type':'application/json' },
-      body: JSON.stringify({ contents:[{ parts:[{text:prompt}] }] })
-    });
-    if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.error?.message || 'HTTP '+resp.status); }
-    const data = await resp.json();
-    return data.candidates[0].content.parts[0].text;
-  }
-
-  throw new Error('Bilinmeyen model');
-}
-
-// Geriye dönük uyumluluk
-function callClaude(prompt) { return callAI(prompt, 'claude'); }
-
-// ── POST ÜRETİCİ ─────────────────────────────────────
-async function generatePost() {
-  const model = document.getElementById('ai-model').value;
-  const key = getApiKey(model);
-  const modelNames = { claude:'Claude', chatgpt:'ChatGPT', gemini:'Gemini' };
-  if (!key) { alert(`Önce ${modelNames[model]} API anahtarını girin.`); return; }
-
-  const platform = document.getElementById('ai-platform').value;
-  const topic = document.getElementById('ai-topic').value;
-  const extra = document.getElementById('ai-extra').value;
-  const platformNames = { instagram:'Instagram', facebook:'Facebook', whatsapp:'WhatsApp Durum', tiktok:'TikTok' };
-  const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
-
-  const loadEl = document.getElementById('ai-loading');
-  loadEl.style.display = 'block';
-  loadEl.textContent = `⏳ ${modelNames[model]} ile oluşturuluyor…`;
-  document.getElementById('ai-result-card').style.display = 'none';
-  document.getElementById('publish-ok').style.display = 'none';
-
-  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\n${platformNames[platform]} için Türkçe bir sosyal medya postu yaz. Konu: ${topicNames[topic]}.${extra ? ' Ekstra bilgi: ' + extra + '.' : ''}\n\nPlatforma uygun uzunlukta, samimi ama şık bir dil kullan. Emoji kullanabilirsin. Hashtagleri sona ekle (#QBeachSide #SideAntalya #BeachRestaurant #AntalyaRestoran gibi). Instagram için 5-8 satır, Facebook için biraz daha uzun, WhatsApp için kısa ve öz olsun.`;
-
   try {
-    const text = await callAI(prompt, model);
-    document.getElementById('ai-output').textContent = text;
-    document.getElementById('ai-result-card').style.display = 'block';
-    document.getElementById('ai-result-card').dataset.platform = platform;
-    document.getElementById('ai-result-card').dataset.model = model;
+    await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
+      method: 'POST', headers: SB_HEADS,
+      body: JSON.stringify({ platform, text, topic })
+    });
+    document.getElementById('manual-post-text').value = '';
+    if (document.getElementById('manual-topic')) document.getElementById('manual-topic').value = '';
+    const ok = document.getElementById('manual-publish-ok');
+    ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 3000);
+    await renderPublishedPosts();
+    toast('✓ Post siteye yayınlandı');
   } catch(e) {
-    let msg = e.message.startsWith('API_KEY_MISSING') ? `${modelNames[model]} API anahtarı girilmedi.` : ('Hata: ' + e.message);
-    document.getElementById('ai-output').textContent = msg;
-    document.getElementById('ai-result-card').style.display = 'block';
-  } finally {
-    document.getElementById('ai-loading').style.display = 'none';
+    toast('✗ Post yayınlanamadı: ' + (e.message || 'Bağlantı hatası'), true);
   }
 }
 
-async function publishPost() {
-  const text = document.getElementById('ai-output').textContent.trim();
-  const platform = document.getElementById('ai-result-card').dataset.platform || document.getElementById('ai-platform').value;
-  const model = document.getElementById('ai-result-card').dataset.model || document.getElementById('ai-model').value;
-  if (!text) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
-    method: 'POST', headers: SB_HEADS,
-    body: JSON.stringify({ platform, text, model })
-  });
-  document.getElementById('publish-ok').style.display = 'block';
-  await renderPublishedPosts();
-  toast('✓ Post siteye yayınlandı');
-}
 
 async function clearPosts() {
   if (!confirm('Tüm postlar silinsin mi?')) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=gt.0`, { method: 'DELETE', headers: SB_READ });
-  await renderPublishedPosts();
-  toast('✓ Postlar silindi');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=gt.0`, { method: 'DELETE', headers: SB_READ });
+    await renderPublishedPosts();
+    toast('✓ Postlar silindi');
+  } catch(e) {
+    toast('✗ Silinemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 async function renderPublishedPosts() {
@@ -1193,23 +1089,60 @@ async function renderPublishedPosts() {
   }
   const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵', site:'✦' };
   container.innerHTML = posts.map(p => `
-    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px;position:relative;">
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:16px;position:relative;" id="post-card-${p.id}">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
         <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||'✦'} ${p.platform}${p.model ? ' · '+p.model : ''}</span>
         <div style="display:flex;gap:8px;align-items:center;">
           <span style="font-size:9px;color:var(--muted);">${p.created_at ? p.created_at.substring(0,10) : ''}</span>
+          <button class="action-btn" style="padding:3px 8px;font-size:8px;" onclick="togglePostEdit(${p.id})">Düzenle</button>
           <button class="action-btn cancel" onclick="deletePost(${p.id})" style="padding:3px 8px;font-size:8px;">Sil</button>
         </div>
       </div>
-      <p style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.6);white-space:pre-wrap;">${p.text.substring(0,180)}${p.text.length>180?'…':''}</p>
+      <p id="post-text-${p.id}" style="font-size:11px;line-height:1.7;color:rgba(255,248,239,0.6);white-space:pre-wrap;">${p.text}</p>
+      <div id="post-edit-${p.id}" style="display:none;margin-top:10px;">
+        <textarea id="post-edit-ta-${p.id}" rows="5" style="width:100%;background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:10px;font-size:11px;font-family:inherit;resize:vertical;box-sizing:border-box;">${p.text.replace(/</g,'&lt;')}</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="add-btn" style="padding:6px 16px;font-size:10px;" onclick="savePostEdit(${p.id})">Kaydet</button>
+          <button class="action-btn cancel" style="padding:6px 12px;font-size:10px;" onclick="togglePostEdit(${p.id})">İptal</button>
+        </div>
+      </div>
     </div>
   `).join('');
 }
 
+function togglePostEdit(id) {
+  const el = document.getElementById('post-edit-' + id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'block') {
+    const ta = document.getElementById('post-edit-ta-' + id);
+    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+}
+
+async function savePostEdit(id) {
+  const ta = document.getElementById('post-edit-ta-' + id);
+  const text = ta ? ta.value.trim() : '';
+  if (!text) { alert('Post metni boş olamaz.'); return; }
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=eq.${id}`, {
+      method: 'PATCH', headers: SB_HEADS, body: JSON.stringify({ text })
+    });
+    await renderPublishedPosts();
+    toast('✓ Post güncellendi');
+  } catch(e) {
+    toast('✗ Güncellenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
+}
+
 async function deletePost(id) {
-  await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
-  await renderPublishedPosts();
-  toast('✓ Post silindi');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
+    await renderPublishedPosts();
+    toast('✓ Post silindi');
+  } catch(e) {
+    toast('✗ Silinemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 // ── TRIPADVISOR YORUMLAR ──────────────────────────────
@@ -1226,12 +1159,12 @@ async function renderAdminReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
   el.innerHTML = '<div class="empty-state">Yükleniyor…</div>';
-  let reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+  let reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
   if (!Array.isArray(reviews) || !reviews.length) {
     for (const r of DEFAULT_REVIEWS) {
       await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, { method: 'POST', headers: SB_HEADS, body: JSON.stringify(r) });
     }
-    reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+    reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=yorum_id.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
   }
   if (!Array.isArray(reviews) || !reviews.length) {
     el.innerHTML = '<div class="empty-state">Henüz yorum yok.</div>';
@@ -1261,210 +1194,47 @@ async function addReview() {
   const metin = document.getElementById('rvText').value.trim();
   const tarih_str = document.getElementById('rvDate').value.trim();
   if (!ad || !metin) { alert('İsim ve yorum metni zorunludur.'); return; }
-  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
-    method: 'POST', headers: SB_HEADS,
-    body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'}) })
-  });
-  await renderAdminReviews();
-  ['rvName','rvCity','rvText','rvDate'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('rvRating').value = '5';
-  toast('✓ Yorum eklendi — site güncellendi');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
+      method: 'POST', headers: SB_HEADS,
+      body: JSON.stringify({ ad, sehir, puan, metin, tarih_str: tarih_str || new Date().toLocaleDateString('tr-TR', {month:'long', year:'numeric'}) })
+    });
+    await renderAdminReviews();
+    ['rvName','rvCity','rvText','rvDate'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('rvRating').value = '5';
+    toast('✓ Yorum eklendi — site güncellendi');
+  } catch(e) {
+    toast('✗ Yorum eklenemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 async function deleteReview(id) {
   if (!confirm('Bu yorumu silmek istiyor musunuz?')) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
-  await renderAdminReviews();
-  toast('✓ Yorum silindi');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=eq.${id}`, { method: 'DELETE', headers: SB_READ });
+    await renderAdminReviews();
+    toast('✓ Yorum silindi');
+  } catch(e) {
+    toast('✗ Silinemedi: ' + (e.message || 'Bağlantı hatası'), true);
+  }
 }
 
 async function resetReviews() {
   if (!confirm('Tüm yorumlar silinip varsayılanlara dönülsün mü?')) return;
-  await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=gt.0`, { method: 'DELETE', headers: SB_READ });
-  for (const r of DEFAULT_REVIEWS) {
-    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
-      method: 'POST', headers: SB_HEADS, body: JSON.stringify(r)
-    });
-  }
-  await renderAdminReviews();
-  toast('✓ Varsayılan yorumlara döndü');
-}
-
-// ── (Otomatik post kaldırıldı) ───────────────────────
-const OTO_PLATFORMS = [];
-const OTO_TOPICS   = ['gunluk','menu','gunbatimi','rezervasyon','hafta_sonu','yaz'];
-let otoTimer = null;
-let otoLastText = '';
-
-function getOtoSettings() {
-  return JSON.parse(localStorage.getItem('qbs_otopost') || '{"enabled":false,"interval":4,"platformMode":"rotate","platIdx":0,"topicIdx":0,"lastTs":0,"history":[]}');
-}
-function saveOtoSettings(s) { localStorage.setItem('qbs_otopost', JSON.stringify(s)); }
-
-function initOtoPost() {
-  const s = getOtoSettings();
-  document.getElementById('otoInterval').value = String(s.interval);
-  document.getElementById('otoPlatform').value = s.platformMode || 'rotate';
-  updateOtoUI(s);
-  if (s.enabled) {
-    scheduleOtoCheck(s);
-    checkOtoNow(s);
-  }
-  renderOtoHistory(s);
-}
-
-function updateOtoUI(s) {
-  const btn = document.getElementById('otoToggleBtn');
-  const badge = document.getElementById('otoBadge');
-  const status = document.getElementById('otoStatus');
-  if (s.enabled) {
-    btn.textContent = '⏹ Otomatik Postu Durdur';
-    btn.style.background = 'var(--red-dark)';
-    badge.style.display = 'flex';
-    const next = s.lastTs + s.interval * 3600000;
-    const diff = Math.max(0, next - Date.now());
-    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
-    status.style.display = 'block';
-    status.innerHTML = `✓ Otomatik yayın aktif · Sıradaki post: <strong style="color:var(--white);">${h}s ${m}d sonra</strong> · Son: ${s.lastTs ? new Date(s.lastTs).toLocaleTimeString('tr-TR') : '—'}`;
-  } else {
-    btn.textContent = '▶ Otomatik Postu Başlat';
-    btn.style.background = '';
-    badge.style.display = 'none';
-    status.style.display = 'none';
-  }
-}
-
-function toggleOtoPost() {
-  const s = getOtoSettings();
-  s.interval = parseInt(document.getElementById('otoInterval').value);
-  s.platformMode = document.getElementById('otoPlatform').value;
-  s.enabled = !s.enabled;
-  if (s.enabled && !s.lastTs) s.lastTs = Date.now() - s.interval * 3600000;
-  saveOtoSettings(s);
-  clearInterval(otoTimer);
-  if (s.enabled) { scheduleOtoCheck(s); checkOtoNow(s); }
-  updateOtoUI(s);
-  toast(s.enabled ? '✓ Otomatik post başlatıldı' : '✓ Otomatik post durduruldu');
-}
-
-function scheduleOtoCheck(s) {
-  clearInterval(otoTimer);
-  otoTimer = setInterval(() => {
-    const cur = getOtoSettings();
-    if (!cur.enabled) { clearInterval(otoTimer); return; }
-    checkOtoNow(cur);
-    updateOtoUI(cur);
-  }, 60000);
-}
-
-async function checkOtoNow(s) {
-  const now = Date.now();
-  if (now - s.lastTs >= s.interval * 3600000) {
-    await autoGenerate(s);
-  }
-}
-
-async function triggerNow() {
-  const s = getOtoSettings();
-  s.interval = parseInt(document.getElementById('otoInterval').value);
-  s.platformMode = document.getElementById('otoPlatform').value;
-  await autoGenerate(s);
-}
-
-async function autoGenerate(s) {
-  const model = document.getElementById('otoModel') ? document.getElementById('otoModel').value : (s.model || 'claude');
-  const modelNames = { claude:'Claude', chatgpt:'ChatGPT', gemini:'Gemini' };
-  const key = getApiKey(model);
-  const statusEl = document.getElementById('otoStatus');
-  statusEl.style.display = 'block';
-
-  if (!key) {
-    statusEl.innerHTML = `❌ <strong style="color:var(--white)">${modelNames[model]}</strong> API anahtarı girilmedi. <strong style="color:var(--white)">Post Üretici</strong> sekmesinden API anahtarınızı kaydedin.`;
-    return;
-  }
-
-  const topicNames = { gunluk:'günlük davet', menu:'menüden öne çıkan yemek', gunbatimi:'günbatımı ve atmosfer', rezervasyon:'rezervasyon hatırlatması', hafta_sonu:'hafta sonu özel', yaz:'yaz sezonu' };
-  const topic = OTO_TOPICS[s.topicIdx % OTO_TOPICS.length];
-  s.model = model;
-
-  statusEl.innerHTML = `⏳ ${modelNames[model]} ile post üretiliyor…`;
-
-  const prompt = `Q Beach Side, Side Antalya'da lüks bir sahil restoranı ve plaj loungedur. Marka rengi kırmızı-siyah, atmosfer: şık, deniz kenarı, gün batımı, fine dining.\n\nTürkçe bir site duyurusu / sosyal medya postu yaz. Konu: ${topicNames[topic]}.\n\nSamimi ama şık bir dil kullan. 5-8 satır olsun. Emoji kullanabilirsin. Sona #QBeachSide #SideAntalya #BeachRestaurant hashtaglerini ekle.`;
-
   try {
-    const text = await callAI(prompt, model);
-    otoLastText = text;
-
-    await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
-      method: 'POST', headers: SB_HEADS,
-      body: JSON.stringify({ platform: 'site', text, topic, model: modelNames[model] })
-    });
-
-    s.lastTs = Date.now();
-    s.topicIdx = (s.topicIdx + 1) % OTO_TOPICS.length;
-    if (!s.history) s.history = [];
-    s.history.unshift({ platform: 'site', topic, text: text.substring(0,120)+'…', ts: s.lastTs, model: modelNames[model] });
-    if (s.history.length > 10) s.history.pop();
-    saveOtoSettings(s);
-
-    document.getElementById('otoPreviewCard').style.display = 'block';
-    document.getElementById('otoPreviewText').textContent = text;
-    renderOtoHistory(s);
-    updateOtoUI(s);
-    await renderPublishedPosts();
-    statusEl.innerHTML = `✓ ${modelNames[model]} ile post üretildi ve siteye yayınlandı`;
-    toast('✓ Otomatik post üretildi');
+    await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?yorum_id=gt.0`, { method: 'DELETE', headers: SB_READ });
+    for (const r of DEFAULT_REVIEWS) {
+      await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, {
+        method: 'POST', headers: SB_HEADS, body: JSON.stringify(r)
+      });
+    }
+    await renderAdminReviews();
+    toast('✓ Varsayılan yorumlara döndü');
   } catch(e) {
-    const msg = e.message.startsWith('API_KEY_MISSING')
-      ? `❌ ${modelNames[model]} API anahtarı girilmedi.`
-      : '❌ Hata: ' + e.message;
-    statusEl.innerHTML = msg;
+    toast('✗ Sıfırlanamadı: ' + (e.message || 'Bağlantı hatası'), true);
   }
 }
 
-async function publishOtoPost() {
-  if (!otoLastText) return;
-  const s = getOtoSettings();
-  const platform = s.platformMode === 'rotate' ? OTO_PLATFORMS[(s.platIdx-1+OTO_PLATFORMS.length)%OTO_PLATFORMS.length] : s.platformMode;
-  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
-    method: 'POST', headers: SB_HEADS,
-    body: JSON.stringify({ platform, text: otoLastText })
-  });
-  await renderPublishedPosts();
-  toast('✓ Post siteye yayınlandı');
-}
-
-function copyOtoPost() {
-  if (!otoLastText) return;
-  navigator.clipboard.writeText(otoLastText).then(() => toast('✓ Kopyalandı'));
-}
-
-function clearOtoPosts() {
-  if (!confirm('Otomatik post geçmişi silinsin mi?')) return;
-  const s = getOtoSettings();
-  s.history = [];
-  saveOtoSettings(s);
-  renderOtoHistory(s);
-  toast('✓ Geçmiş temizlendi');
-}
-
-function renderOtoHistory(s) {
-  const el = document.getElementById('otoHistoryList');
-  const empty = document.getElementById('otoEmpty');
-  if (!el) return;
-  const h = s.history || [];
-  if (!h.length) { el.innerHTML = '<div class="empty-state" id="otoEmpty">Henüz otomatik post yok.</div>'; return; }
-  const platIcon = { instagram:'📸', facebook:'👍', whatsapp:'💬', tiktok:'🎵' };
-  el.innerHTML = h.map(p => `
-    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:14px 18px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);">${platIcon[p.platform]||''} ${p.platform}</span>
-        <span style="font-size:9px;color:var(--muted);">${new Date(p.ts).toLocaleString('tr-TR')}</span>
-      </div>
-      <p style="font-size:11px;line-height:1.6;color:rgba(255,248,239,0.5);">${p.text}</p>
-    </div>
-  `).join('');
-}
 
 // ── INIT ─────────────────────────────────────────────
 async function initApp() {
