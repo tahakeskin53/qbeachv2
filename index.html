@@ -1053,9 +1053,12 @@
       <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);display:block;margin-bottom:6px;">Notlar / Özel İstek</label>
       <textarea id="editNotlar" rows="3" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(201,149,42,0.2);color:#fff;padding:12px 14px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
     </div>
-    <div style="display:flex;gap:12px;">
+    <div style="display:flex;gap:12px;margin-bottom:12px;">
       <button onclick="kaydetRezDuzenleme()" style="flex:1;background:var(--red);color:#fff;border:none;padding:14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;">Değişiklikleri Kaydet</button>
-      <button onclick="document.getElementById('rezEditModal').style.display='none'" style="padding:14px 20px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;">İptal</button>
+      <button onclick="iptalEtRezervasyon()" style="flex:1;background:none;border:1px solid var(--red);color:var(--red);padding:14px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;">Rezervasyonu İptal Et</button>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <button onclick="document.getElementById('rezEditModal').style.display='none'" style="width:100%;padding:14px 20px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:inherit;">Kapat</button>
     </div>
   </div>
 </div>
@@ -1223,10 +1226,12 @@
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
         },
         body: JSON.stringify(data)
       });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }
   };
@@ -1592,8 +1597,8 @@
       return;
     }
     const alanAdi = id => id === 2 ? 'Plaj' : 'Restoran';
-    const durumRenk = d => d === 'onaylandi' ? '#34A853' : d === 'iptal' ? '#C8102E' : 'rgba(201,149,42,0.8)';
-    const durumTR = d => d === 'onaylandi' ? 'Onaylı' : d === 'iptal' ? 'İptal' : 'Beklemede';
+    const durumRenk = d => (d === 'onaylandi' || d === 'onaylı') ? '#34A853' : d === 'iptal' ? '#C8102E' : 'rgba(201,149,42,0.8)';
+    const durumTR = d => (d === 'onaylandi' || d === 'onaylı') ? 'Onaylı' : d === 'iptal' ? 'İptal' : 'Beklemede';
     sonucEl.innerHTML = `<p style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:16px;text-align:center;">Hoş geldiniz, <strong style="color:rgba(255,255,255,0.75);">${ad}</strong> — ${rezler.length} rezervasyon bulundu</p>` +
       rezler.map(r => `
         <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(201,149,42,0.12);padding:20px 24px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
@@ -1627,11 +1632,36 @@
     const notlar = document.getElementById('editNotlar').value.trim();
     if (!tarih || !saat || !kisi) { alert('Tarih, saat ve kişi sayısı zorunludur.'); return; }
     const btn = document.querySelector('#rezEditModal button[onclick="kaydetRezDuzenleme()"]');
+    const origText = btn.textContent;
     btn.textContent = 'Kaydediliyor…'; btn.disabled = true;
-    await sb.update('rezervasyon', { tarih, saat, kisi_sayisi: kisi, notlar }, `rezervasyon_id=eq.${id}`);
-    btn.textContent = 'Değişiklikleri Kaydet'; btn.disabled = false;
-    document.getElementById('rezEditModal').style.display = 'none';
-    sorgulaRezervasyon();
+    try {
+      await sb.update('rezervasyon', { tarih, saat, kisi_sayisi: kisi, notlar }, `rezervasyon_id=eq.${id}`);
+      alert('Değişiklikler başarıyla kaydedildi.');
+      document.getElementById('rezEditModal').style.display = 'none';
+      sorgulaRezervasyon();
+    } catch (err) {
+      alert('Hata: Değişiklikler kaydedilemedi.');
+    } finally {
+      btn.textContent = origText; btn.disabled = false;
+    }
+  }
+
+  async function iptalEtRezervasyon() {
+    const id = document.getElementById('editRezId').value;
+    if (!confirm('Rezervasyonunuzu iptal etmek istediğinize emin misiniz?')) return;
+    const btn = document.querySelector('#rezEditModal button[onclick="iptalEtRezervasyon()"]');
+    const origText = btn.textContent;
+    btn.textContent = 'İptal Ediliyor…'; btn.disabled = true;
+    try {
+      await sb.update('rezervasyon', { durum: 'iptal' }, `rezervasyon_id=eq.${id}`);
+      alert('Rezervasyonunuz başarıyla iptal edildi.');
+      document.getElementById('rezEditModal').style.display = 'none';
+      sorgulaRezervasyon();
+    } catch (err) {
+      alert('Hata: İptal işlemi gerçekleştirilemedi.');
+    } finally {
+      btn.textContent = origText; btn.disabled = false;
+    }
   }
 </script>
 
