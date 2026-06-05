@@ -307,7 +307,6 @@
       <button class="nav-btn" onclick="showTab('menu',this)"><span class="icon">🍽</span><span>Menü</span></button>
       <button class="nav-btn" onclick="showTab('posts',this)"><span class="icon">✦</span><span>Post Üretici</span></button>
       <button class="nav-btn" onclick="showTab('yorumlar',this)"><span class="icon">★</span><span>TA Yorumlar</span></button>
-      <button class="nav-btn" onclick="showTab('otopost',this)"><span class="icon">⏱</span><span>Otomatik Post</span></button>
       <div class="nav-group-label">Diğer</div>
       <button class="nav-btn" onclick="window.open('index.html','_blank')"><span class="icon">↗</span><span>Siteye Git</span></button>
       <button class="nav-btn" onclick="doLogout()" style="color:rgba(200,16,46,0.7);margin-top:8px;border-top:1px solid rgba(200,16,46,0.1)"><span class="icon">⏻</span><span>Çıkış Yap</span></button>
@@ -520,108 +519,32 @@
       <div class="topbar">
         <div>
           <div class="page-title">Post Üretici</div>
-          <div class="page-sub">AI ile Sosyal Medya İçeriği Oluştur</div>
-        </div>
-      </div>
-
-      <!-- API Anahtarları -->
-      <div class="section-card" style="margin-bottom:20px;border-color:rgba(201,149,42,0.35);">
-        <div class="section-card-head" style="border-color:rgba(201,149,42,0.2);">
-          <div class="section-card-title" style="color:var(--gold);">⚙ Yapay Zeka API Anahtarları</div>
-          <div id="apiKeyStatus" style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);"></div>
-        </div>
-        <div class="section-card-body" style="display:flex;flex-direction:column;gap:14px;">
-          <!-- Claude -->
-          <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div class="fg" style="flex:1;margin:0;">
-              <label>Claude API Key (sk-ant-…)</label>
-              <input type="password" id="apiKeyClaude" placeholder="sk-ant-api03-…" style="font-family:monospace;letter-spacing:1px;">
-            </div>
-            <button class="add-btn" onclick="saveAiKey('claude')" style="margin-bottom:0;white-space:nowrap;background:#5436DA;">Kaydet</button>
-            <button class="action-btn cancel" onclick="clearAiKey('claude')" style="padding:11px 14px;">Sil</button>
-          </div>
-          <div id="claudeKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
-            · <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--gold);text-decoration:none;">console.anthropic.com</a> adresinden alın
-          </div>
-          <!-- ChatGPT -->
-          <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div class="fg" style="flex:1;margin:0;">
-              <label>ChatGPT API Key (sk-proj-…)</label>
-              <input type="password" id="apiKeyChatgpt" placeholder="sk-proj-…" style="font-family:monospace;letter-spacing:1px;">
-            </div>
-            <button class="add-btn" onclick="saveAiKey('chatgpt')" style="margin-bottom:0;white-space:nowrap;background:#10a37f;">Kaydet</button>
-            <button class="action-btn cancel" onclick="clearAiKey('chatgpt')" style="padding:11px 14px;">Sil</button>
-          </div>
-          <div id="chatgptKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
-            · <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--gold);text-decoration:none;">platform.openai.com</a> adresinden alın
-          </div>
-          <!-- Gemini -->
-          <div style="display:flex;gap:10px;align-items:flex-end;">
-            <div class="fg" style="flex:1;margin:0;">
-              <label>Gemini API Key (AIza…)</label>
-              <input type="password" id="apiKeyGemini" placeholder="AIzaSy…" style="font-family:monospace;letter-spacing:1px;">
-            </div>
-            <button class="add-btn" onclick="saveAiKey('gemini')" style="margin-bottom:0;white-space:nowrap;background:#1a73e8;">Kaydet</button>
-            <button class="action-btn cancel" onclick="clearAiKey('gemini')" style="padding:11px 14px;">Sil</button>
-          </div>
-          <div id="geminiKeyStatus" style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:-8px;">
-            · <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--gold);text-decoration:none;">aistudio.google.com</a> adresinden alın (ücretsiz)
-          </div>
+          <div class="page-sub">Siteye Manuel Post Ekle</div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        <!-- Sol: Üretici -->
+        <!-- Sol: Manuel Ekleme -->
         <div>
           <div class="section-card">
-            <div class="section-card-head"><div class="section-card-title">Post Oluştur</div></div>
+            <div class="section-card-head"><div class="section-card-title">Post Ekle</div></div>
             <div class="section-card-body">
               <div class="fg">
-                <label>Yapay Zeka Modeli</label>
-                <select id="ai-model">
-                  <option value="claude">Claude (Anthropic)</option>
-                  <option value="chatgpt">ChatGPT (OpenAI)</option>
-                  <option value="gemini">Gemini (Google)</option>
-                </select>
-              </div>
-              <div class="fg">
                 <label>Platform</label>
-                <select id="ai-platform">
+                <select id="manual-platform">
                   <option value="instagram">Instagram</option>
                   <option value="facebook">Facebook</option>
                   <option value="whatsapp">WhatsApp Durum</option>
                   <option value="tiktok">TikTok</option>
+                  <option value="site">Site Duyurusu</option>
                 </select>
               </div>
               <div class="fg">
-                <label>Konu / Tema</label>
-                <select id="ai-topic">
-                  <option value="gunluk">Günlük Davet</option>
-                  <option value="menu">Menüden Öne Çıkan</option>
-                  <option value="gunbatimi">Günbatımı / Atmosfer</option>
-                  <option value="rezervasyon">Rezervasyon Hatırlatması</option>
-                  <option value="hafta_sonu">Hafta Sonu Özel</option>
-                  <option value="yaz">Yaz Sezonu</option>
-                </select>
+                <label>Post Metni</label>
+                <textarea id="manual-post-text" placeholder="Post içeriğini buraya yazın…" style="min-height:200px;"></textarea>
               </div>
-              <div class="fg">
-                <label>Ekstra Not (isteğe bağlı)</label>
-                <input type="text" id="ai-extra" placeholder="Örn: Bu akşam levrek özel fiyatı var">
-              </div>
-              <button class="add-btn" onclick="generatePost()">Post Oluştur</button>
-              <div id="ai-loading" style="display:none;margin-top:14px;font-size:10px;color:var(--muted);letter-spacing:1px;">⏳ Oluşturuluyor…</div>
-            </div>
-          </div>
-
-          <div class="section-card" id="ai-result-card" style="display:none;">
-            <div class="section-card-head"><div class="section-card-title">Oluşturulan Post</div></div>
-            <div class="section-card-body">
-              <div id="ai-output" style="font-size:13px;line-height:1.8;color:rgba(255,248,239,0.8);white-space:pre-wrap;margin-bottom:16px;"></div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button class="add-btn" onclick="publishPost()">✦ Siteye Yayınla</button>
-                <button class="action-btn" onclick="copyPost()">Kopyala</button>
-              </div>
-              <div id="publish-ok" style="display:none;margin-top:10px;font-size:10px;color:var(--green);letter-spacing:1px;">✓ Site güncellendi — Duyurular bölümünde yayında</div>
+              <button class="add-btn" onclick="addManualPost()">✦ Siteye Yayınla</button>
+              <div id="manual-publish-ok" style="display:none;margin-top:10px;font-size:10px;color:var(--green);letter-spacing:1px;">✓ Site güncellendi — Duyurular bölümünde yayında</div>
             </div>
           </div>
         </div>
@@ -648,7 +571,7 @@
           <div class="page-title">TripAdvisor Yorumlar</div>
           <div class="page-sub">Sitede Gösterilecek Yorumları Yönet</div>
         </div>
-        <a href="https://www.tripadvisor.com.tr/Restaurant_Review-g297968-d4587502-Reviews-Q_Beach_Restaurant_Lounge-Side_Manavgat_Turkish_Mediterranean_Coast.html" target="_blank" class="add-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">↗ TA Sayfasını Aç</a>
+        <a href="https://www.tripadvisor.com.tr/Restaurant_Review-g297968-d4587502-Reviews-Q_Beach_Restoran-Side_Manavgat_Turkish_Mediterranean_Coast.html" target="_blank" class="add-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">↗ TA Sayfasını Aç</a>
       </div>
 
       <!-- Yeni Yorum Ekle -->
@@ -680,88 +603,6 @@
         </div>
         <div class="section-card-body" id="reviewsList" style="display:flex;flex-direction:column;gap:12px;">
           <div class="empty-state">Yükleniyor…</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── OTOMATİK POST ──────────────────────────────── -->
-    <div class="tab-panel" id="tab-otopost">
-      <div class="topbar">
-        <div>
-          <div class="page-title">Otomatik Post</div>
-          <div class="page-sub">Yapay Zeka Otomatik İçerik Üretsin</div>
-        </div>
-        <div class="live-badge" id="otoBadge" style="display:none;"><div class="live-dot"></div>Aktif</div>
-      </div>
-
-      <!-- Ayarlar -->
-      <div class="section-card" style="margin-bottom:20px;">
-        <div class="section-card-head">
-          <div class="section-card-title">Zamanlama Ayarları</div>
-          <div style="font-size:9px;letter-spacing:1px;color:var(--muted);">Postlar sadece sitede yayınlanır</div>
-        </div>
-        <div class="section-card-body">
-          <div class="form-grid" style="margin-bottom:20px;">
-            <div class="fg">
-              <label>Yapay Zeka Modeli</label>
-              <select id="otoModel">
-                <option value="claude">Claude (Anthropic)</option>
-                <option value="chatgpt">ChatGPT (OpenAI)</option>
-                <option value="gemini">Gemini (Google)</option>
-              </select>
-            </div>
-            <div class="fg">
-              <label>Yayın Sıklığı</label>
-              <select id="otoInterval">
-                <option value="1">Her 1 saatte bir</option>
-                <option value="2">Her 2 saatte bir</option>
-                <option value="4" selected>Her 4 saatte bir</option>
-                <option value="6">Her 6 saatte bir</option>
-                <option value="12">Her 12 saatte bir</option>
-                <option value="24">Günde bir kez</option>
-              </select>
-            </div>
-            <div class="fg">
-              <label>Konu Sırası</label>
-              <select id="otoPlatform">
-                <option value="rotate">Tüm konuları sırayla dön</option>
-                <option value="instagram">Hep Günlük Davet</option>
-                <option value="facebook">Hep Menü Önerisi</option>
-                <option value="whatsapp">Hep Günbatımı</option>
-              </select>
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.02);border-left:2px solid var(--gold);">
-            ℹ️ Üretilen postlar otomatik olarak <strong style="color:var(--white)">sitenin Duyurular bölümünde</strong> yayınlanır. Instagram/Facebook'a otomatik gönderim yapılmaz — postları kopyalayıp manuel paylaşabilirsiniz.
-          </div>
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <button class="add-btn" id="otoToggleBtn" onclick="toggleOtoPost()">▶ Otomatik Postu Başlat</button>
-            <button class="action-btn" onclick="triggerNow()" style="padding:12px 20px;">⚡ Şimdi Üret</button>
-          </div>
-          <div id="otoStatus" style="margin-top:16px;padding:14px 18px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:11px;color:var(--muted);letter-spacing:1px;display:none;"></div>
-        </div>
-      </div>
-
-      <!-- Sıradaki Post Önizleme -->
-      <div class="section-card" id="otoPreviewCard" style="display:none;">
-        <div class="section-card-head"><div class="section-card-title">Son Üretilen Post</div></div>
-        <div class="section-card-body">
-          <div id="otoPreviewText" style="font-size:13px;line-height:1.8;color:rgba(255,248,239,0.8);white-space:pre-wrap;margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);"></div>
-          <div style="display:flex;gap:10px;">
-            <button class="add-btn" onclick="publishOtoPost()">✦ Siteye Yayınla</button>
-            <button class="action-btn" onclick="copyOtoPost()">Kopyala</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Geçmiş Oto Postlar -->
-      <div class="section-card" style="margin-top:20px;">
-        <div class="section-card-head">
-          <div class="section-card-title">Otomatik Yayınlanan Postlar</div>
-          <button class="action-btn cancel" onclick="clearOtoPosts()">Temizle</button>
-        </div>
-        <div class="section-card-body" id="otoHistoryList" style="display:flex;flex-direction:column;gap:12px;">
-          <div class="empty-state" id="otoEmpty">Henüz otomatik post yok.</div>
         </div>
       </div>
     </div>
@@ -1113,15 +954,32 @@ async function delMenuItem(id) {
   toast('✓ Ürün silindi');
 }
 
-// ── ANTHROPIC API BAĞLANTISI ──────────────────────────
-// ── ÇOKLU AI API YÖNETİMİ ────────────────────────────
+// ── MANUEL POST ──────────────────────────────────────
+async function addManualPost() {
+  const text = document.getElementById('manual-post-text').value.trim();
+  const platform = document.getElementById('manual-platform').value;
+  if (!text) { alert('Post metni boş olamaz.'); return; }
+  await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
+    method: 'POST', headers: SB_HEADS,
+    body: JSON.stringify({ platform, text })
+  });
+  document.getElementById('manual-post-text').value = '';
+  const ok = document.getElementById('manual-publish-ok');
+  ok.style.display = 'block';
+  setTimeout(() => ok.style.display = 'none', 3000);
+  await renderPublishedPosts();
+  toast('✓ Post siteye yayınlandı');
+}
+
 function getApiKey(model) {
   return localStorage.getItem('qbs_api_key_' + model) || '';
 }
 
 function saveAiKey(model) {
   const inputMap = { claude:'apiKeyClaude', chatgpt:'apiKeyChatgpt', gemini:'apiKeyGemini' };
-  const key = document.getElementById(inputMap[model]).value.trim();
+  const el = document.getElementById(inputMap[model]);
+  if (!el) return;
+  const key = el.value.trim();
   if (!key) { alert('API anahtarı boş olamaz.'); return; }
   localStorage.setItem('qbs_api_key_' + model, key);
   document.getElementById(inputMap[model]).value = '';
@@ -1245,11 +1103,6 @@ async function publishPost() {
   toast('✓ Post siteye yayınlandı');
 }
 
-function copyPost() {
-  const text = document.getElementById('ai-output').textContent;
-  navigator.clipboard.writeText(text).then(() => toast('✓ Kopyalandı'));
-}
-
 async function clearPosts() {
   if (!confirm('Tüm postlar silinsin mi?')) return;
   await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=gt.0`, { method: 'DELETE', headers: SB_READ });
@@ -1299,7 +1152,13 @@ async function renderAdminReviews() {
   const el = document.getElementById('reviewsList');
   if (!el) return;
   el.innerHTML = '<div class="empty-state">Yükleniyor…</div>';
-  const reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+  let reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+  if (!Array.isArray(reviews) || !reviews.length) {
+    for (const r of DEFAULT_REVIEWS) {
+      await fetch(`${SUPABASE_URL}/rest/v1/site_yorum`, { method: 'POST', headers: SB_HEADS, body: JSON.stringify(r) });
+    }
+    reviews = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id,ad,sehir,puan,metin,tarih_str&order=eklenme.asc`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+  }
   if (!Array.isArray(reviews) || !reviews.length) {
     el.innerHTML = '<div class="empty-state">Henüz yorum yok.</div>';
     return;
@@ -1357,8 +1216,8 @@ async function resetReviews() {
   toast('✓ Varsayılan yorumlara döndü');
 }
 
-// ── OTOMATİK POST ─────────────────────────────────────
-const OTO_PLATFORMS = ['instagram','facebook','whatsapp','tiktok'];
+// ── (Otomatik post kaldırıldı) ───────────────────────
+const OTO_PLATFORMS = [];
 const OTO_TOPICS   = ['gunluk','menu','gunbatimi','rezervasyon','hafta_sonu','yaz'];
 let otoTimer = null;
 let otoLastText = '';
@@ -1538,8 +1397,6 @@ async function initApp() {
   renderDashboard();
   await renderPublishedPosts();
   await renderAdminReviews();
-  initOtoPost();
-  updateApiKeyUI();
   document.getElementById('nrDate').value = new Date().toISOString().split('T')[0];
 }
 
@@ -1550,7 +1407,6 @@ showTab = function(tab, btn) {
   _origShowTab(tab, btn);
   if (tab === 'yorumlar') renderAdminReviews();
   if (tab === 'posts') renderPublishedPosts();
-  if (tab === 'otopost') { const s = getOtoSettings(); updateOtoUI(s); renderOtoHistory(s); }
 };
 
 if (_validToken(sessionStorage.getItem('qbs_admin') || '')) initApp();

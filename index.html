@@ -1056,7 +1056,7 @@
 
     <!-- TripAdvisor CTA -->
     <div style="text-align:center;margin-top:40px;">
-      <a href="https://www.tripadvisor.com" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid rgba(52,168,83,0.4);color:#34A853;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(52,168,83,0.08)'" onmouseout="this.style.background='transparent'">
+      <a href="https://www.tripadvisor.com.tr/Restaurant_Review-g297968-d4587502-Reviews-Q_Beach_Restoran-Side_Manavgat_Turkish_Mediterranean_Coast.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1px solid rgba(52,168,83,0.4);color:#34A853;font-size:10px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(52,168,83,0.08)'" onmouseout="this.style.background='transparent'">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         TripAdvisor'da Tüm Yorumları Gör
       </a>
@@ -1291,7 +1291,7 @@
         </div>
       </a>
       <!-- TripAdvisor -->
-      <a href="https://tripadvisor.com" target="_blank" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(52,168,83,0.5)';this.style.background='rgba(52,168,83,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
+      <a href="https://www.tripadvisor.com.tr/Restaurant_Review-g297968-d4587502-Reviews-Q_Beach_Restoran-Side_Manavgat_Turkish_Mediterranean_Coast.html" target="_blank" style="display:flex;align-items:center;gap:14px;padding:20px 32px;border:1px solid rgba(255,255,255,0.08);text-decoration:none;color:var(--white);transition:all 0.3s;min-width:200px;" onmouseover="this.style.borderColor='rgba(52,168,83,0.5)';this.style.background='rgba(52,168,83,0.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.background='transparent'">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="#34A853" stroke="none"><circle cx="7" cy="13" r="3"></circle><circle cx="17" cy="13" r="3"></circle><path d="M12 5C8.5 5 5.5 6.5 3.5 9H2l2.5 2.5A5 5 0 0 0 7 16a5 5 0 0 0 4-2h2a5 5 0 0 0 4 2 5 5 0 0 0 2.5-4.5L22 9h-1.5C18.5 6.5 15.5 5 12 5z"></path></svg>
         <div>
           <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px;">TripAdvisor</div>
@@ -1450,7 +1450,7 @@
     if (!grid) return;
     const urunler = await sb.select('urun', `select=*&kategori_id=eq.${catId}&aktif=eq.true&order=urun_id.asc`);
     if (!Array.isArray(urunler) || !urunler.length) return;
-    grid.innerHTML = urunler.map(u => `
+    grid.innerHTML += urunler.map(u => `
       <div class="menu-item">
         <div class="menu-item-header">
           <span class="menu-item-name">${u.urun_adi}</span>
