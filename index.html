@@ -585,8 +585,7 @@
     .type-btn { font-size: 9px; padding: 10px 8px; }
   }
 </style>
-<link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><link id="gfont-Source-Sans-Pro" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&amp;display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script></head>
+<link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><link id="gfont-Source-Sans-Pro" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&amp;display=swap"></head>
 <body data-cc-id="cc-1" style="cursor: crosshair; font-family: &quot;Times New Roman&quot;; background-color: rgb(8, 0, 5);">
 
 <!-- ── NAVBAR ──────────────────────────────────────── -->
@@ -1346,39 +1345,42 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // ── EmailJS Kurulumu (Vercel rezervasyon e-postası için) ─────
-  // 1. https://emailjs.com → ücretsiz hesap aç
-  // 2. Add New Service → Gmail/Outlook → Service ID'yi buraya yaz
-  // 3. Email Templates → Yeni template oluştur → Template ID'yi yaz
-  // 4. Account → Public Key'i buraya yaz
-  // Template değişkenleri: {{musteri_adi}} {{email}} {{telefon}} {{tarih}} {{saat}}
-  //   {{alan_turu}} {{kisi_sayisi}} {{ozel_gun}} {{notlar}}
-  const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-  emailjs.init('YOUR_PUBLIC_KEY');
-
-  // ── MySQL API BAĞLANTISI ─────────────────────────────
-  const API = 'api.php';
+  // ── SUPABASE BAĞLANTISI ──────────────────────────────
+  const SUPABASE_URL = 'https://wgvnqrebxaptdpdohbfb.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indndm5xcmVieGFwdGRwZG9oYmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTQ4NTAsImV4cCI6MjA5MjU5MDg1MH0.yr3tpedDcj8wPplBhyRB015iEmTIdOAZcCJUB4G7e8Y';
 
   const sb = {
     async insert(table, data) {
-      const actionMap = { musteri: 'musteri_ekle', rezervasyon: 'rezervasyon_ekle', doluluk_kaydi: 'doluluk_kaydet', urun: 'urun_ekle' };
-      const res = await fetch(`${API}?action=${actionMap[table]}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(data)
       });
       return res.json();
     },
     async select(table, params = '') {
-      const actionMap = { urun: 'urun_listele', doluluk_kaydi: 'doluluk_getir', rezervasyon: 'rezervasyon_listele' };
-      const p = new URLSearchParams(params);
-      const kat = p.get('kategori_id') ? `&kategori_id=${p.get('kategori_id').replace('eq.', '')}` : '';
-      const res = await fetch(`${API}?action=${actionMap[table]}${kat}`);
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+      });
       return res.json();
     },
     async update(table, data, match) {
-      const id = match.split('eq.')[1];
-      const res = await fetch(`${API}?action=rezervasyon_guncelle&id=${id}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data)
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${match}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
       });
       return res.json();
     }
@@ -1569,17 +1571,26 @@
     btn.textContent = 'Gönderiliyor...';
 
     try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        musteri_adi: name,
-        email: document.getElementById('rEmail')?.value.trim() || '',
+      const musteriData = await sb.insert('musteri', {
+        ad: name,
+        soyad: '',
         telefon: phone,
+        email: document.getElementById('rEmail')?.value.trim() || ''
+      });
+
+      const musteri_id = musteriData[0].musteri_id;
+      const alan_id = currentType === 'restoran' ? 1 : 2;
+
+      await sb.insert('rezervasyon', {
+        musteri_id: musteri_id,
+        alan_id: alan_id,
         tarih: date,
         saat: time,
-        alan_turu: currentType === 'restoran' ? 'Restoran' : 'Plaj Alanı',
-        kisi_sayisi: document.getElementById('rGuests').value,
-        ozel_gun: document.getElementById('rOccasion')?.value || '-',
-        notlar: document.getElementById('rNotes').value || '-'
+        kisi_sayisi: parseInt(document.getElementById('rGuests').value) || 1,
+        durum: 'bekleyen',
+        notlar: document.getElementById('rNotes').value || ''
       });
+
       document.getElementById('rezv-form-content').style.display = 'none';
       document.getElementById('rezv-success').style.display = 'block';
     } catch (err) {
