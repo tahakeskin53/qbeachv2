@@ -878,12 +878,53 @@ const catNames = { starters:'Başlangıçlar', seafood:'Deniz Ürünleri', main:
 const catIds = { starters:1, seafood:2, main:3, cocktails:4, desserts:5 };
 const catIdToKey = { 1:'starters', 2:'seafood', 3:'main', 4:'cocktails', 5:'desserts' };
 
+const DEMO_MENU = [
+  {urun_adi:'Avokado Salatası',   fiyat:280, kategori_id:1, aciklama:'Taze avokado, cherry domates, rokola, limon vinaigrette, kinoa', etiket:'Vegan'},
+  {urun_adi:'Sığır Carpaccio',    fiyat:420, kategori_id:1, aciklama:'İnce dilim dana bonfile, parmesan, kapari, roka, truffle yağı', etiket:'Şef Önerisi'},
+  {urun_adi:'Karides Tava',       fiyat:380, kategori_id:1, aciklama:'Sarımsaklı tereyağ, cherry domates, taze fesleğen, sourdough ekmek', etiket:''},
+  {urun_adi:'Kalamar Tava',       fiyat:320, kategori_id:1, aciklama:'Çıtır kalamar halkası, limon sosu, taze maydanozlu aioli', etiket:'Popüler'},
+  {urun_adi:'Tagliata di Manzo',  fiyat:460, kategori_id:1, aciklama:'Roka yatağında dilimlenmiş biftek, parmesan, cherry domates, balsamik', etiket:''},
+  {urun_adi:'Ahtapot Izgara',     fiyat:490, kategori_id:1, aciklama:'Marine edilmiş ahtapot, limon yağı, taze kekik, sarımsak puresi', etiket:'Şef Önerisi'},
+  {urun_adi:'Avokadolu Somon',    fiyat:520, kategori_id:2, aciklama:'Pan-seared somon, avokado salsa, limon sosu, taze kişniş', etiket:'Şef Önerisi'},
+  {urun_adi:'Surf & Turf',        fiyat:780, kategori_id:2, aciklama:'Bonfile ve ıstakoz kuyruğu, béarnaise sos, kuşkonmaz, taze patates', etiket:'Premium'},
+  {urun_adi:'Levrek Izgara',      fiyat:440, kategori_id:2, aciklama:'Taze levrek, limon-dereotu sosu, sebze tian, zeytinyağı', etiket:''},
+  {urun_adi:'Deniz Mahsulleri Risotto', fiyat:490, kategori_id:2, aciklama:'Karides, ahtapot, midye, arborio pirinç, safran, parmesan', etiket:'Popüler'},
+  {urun_adi:'Lokum Bonfile',      fiyat:680, kategori_id:2, aciklama:'Karides bonfile, kremali mantar sosu, trüf, taze patates püresi', etiket:'Şef Önerisi'},
+  {urun_adi:'Çipura Karpaz',      fiyat:390, kategori_id:2, aciklama:'Taze çipura, kapari, zeytinyağı, domates, Akdeniz otları', etiket:''},
+  {urun_adi:'Gorgonzola Steak',   fiyat:720, kategori_id:3, aciklama:'250gr ribeye, gorgonzola sosu, çıtır soğan, ev patates kızartması', etiket:'Şef Önerisi'},
+  {urun_adi:'Lokum Bonfile',      fiyat:650, kategori_id:3, aciklama:'200gr dana bonfile, mantar sosu, yeşil biber, trüf yağı', etiket:'Premium'},
+  {urun_adi:'Surf & Turf',        fiyat:890, kategori_id:3, aciklama:'Bonfile + ıstakoz kuyruğu, béarnaise sos, kuşkonmaz', etiket:''},
+  {urun_adi:'Kuzu Pirzola',       fiyat:580, kategori_id:3, aciklama:'Kekikli kuzu pirzola, taze nane sosu, köz biber, pilav', etiket:'Popüler'},
+  {urun_adi:'Q Signature',        fiyat:240, kategori_id:4, aciklama:'Tequila, mango püresi, jalapeño, limon, tuzlu rim', etiket:'İmza İçki'},
+  {urun_adi:'Sunset Spritz',      fiyat:220, kategori_id:4, aciklama:'Aperol, prosecco, portakal suyu, gül yaprakları, soda', etiket:'Popüler'},
+  {urun_adi:'Beach Mojito',       fiyat:200, kategori_id:4, aciklama:'Beyaz rom, limon, nane, şeker kamışı, soda, taze nane buketi', etiket:''},
+  {urun_adi:'Sea Breeze',         fiyat:210, kategori_id:4, aciklama:'Cin, salatalık, taze dereotu, tonik, deniz tuzu', etiket:'Serin'},
+  {urun_adi:'Rosemary Sour',      fiyat:230, kategori_id:4, aciklama:'Bourbon, limon, biberiye şurubu, egg white, angostura', etiket:''},
+  {urun_adi:'Virgin Colada',      fiyat:160, kategori_id:4, aciklama:'Hindistancevizi sütü, ananas, limon, nane, soda — alkolsüz', etiket:'Alkolsüz'},
+  {urun_adi:'Limon Tart',         fiyat:180, kategori_id:5, aciklama:'Taze limon kreması, İtalyan merengi, çıtır tart hamuru', etiket:'Hafif'},
+  {urun_adi:'Çikolatalı Lav Kek', fiyat:200, kategori_id:5, aciklama:'Sıcak çikolata fondant, vanilyalı dondurma, frenk üzümü sosu', etiket:'Popüler'},
+  {urun_adi:'Panna Cotta',        fiyat:160, kategori_id:5, aciklama:'Vanilyalı panna cotta, çilek coulis, taze mevsim meyveleri', etiket:''},
+  {urun_adi:'Tiramisu',           fiyat:175, kategori_id:5, aciklama:'Klasik İtalyan tarifi, mascarpone, espresso, kakao', etiket:''},
+];
+
+async function seedDemoMenu() {
+  for (const u of DEMO_MENU) {
+    await sb.insert('urun', { ...u, aktif: true });
+  }
+}
+
 async function renderMenu() {
   const grid = document.getElementById('menuMgmtGrid');
   grid.innerHTML = '<div style="padding:24px;color:var(--muted)">Yükleniyor...</div>';
 
   // Kategorileri oluştur
   await ensureCategories();
+
+  // Demo menüyü otomatik yükle (tablo boşsa)
+  const check = await sb.query('urun', 'select=urun_id&limit=1');
+  if (Array.isArray(check) && check.length === 0) {
+    await seedDemoMenu();
+  }
 
   const urunler = await sb.query('urun', 'select=*,menu_kategori(kategori_adi)&order=urun_id.asc');
   if (!Array.isArray(urunler)) return;
@@ -897,14 +938,30 @@ async function renderMenu() {
       <div class="section-card-body">
         <div id="mcat-${cat}">
           ${items.length ? items.map(item => `
-            <div class="menu-item-row">
-              <div>
+            <div class="menu-item-row" id="mirow-${item.urun_id}">
+              <div style="flex:1;">
                 <div class="mi-name">${item.urun_adi}</div>
                 <div style="font-size:10px;color:var(--muted);margin-top:2px">${item.aciklama || ''}</div>
+                ${item.etiket ? `<span style="font-size:9px;background:rgba(201,149,42,0.12);color:rgba(201,149,42,0.8);padding:2px 8px;border-radius:2px;margin-top:4px;display:inline-block;">${item.etiket}</span>` : ''}
               </div>
-              <div style="display:flex;align-items:center;gap:12px">
+              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
                 <span class="mi-price">₺${item.fiyat}</span>
+                <button class="action-btn" style="padding:4px 10px;font-size:10px;" onclick="showEditMenuItem(${item.urun_id},'${item.urun_adi.replace(/'/g,"\\'")}',${item.fiyat},'${(item.aciklama||'').replace(/'/g,"\\'")}','${(item.etiket||'').replace(/'/g,"\\'")}',${item.kategori_id})">Düzenle</button>
                 <button class="mi-del" onclick="delMenuItem(${item.urun_id})">×</button>
+              </div>
+            </div>
+            <div id="miedit-${item.urun_id}" style="display:none;background:rgba(201,149,42,0.04);border:1px solid rgba(201,149,42,0.12);padding:16px;margin-bottom:8px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <input id="ei-name-${item.urun_id}" value="${item.urun_adi.replace(/"/g,'&quot;')}" placeholder="Ürün Adı" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px 12px;font-size:12px;font-family:inherit;outline:none;">
+                <input id="ei-price-${item.urun_id}" type="number" value="${item.fiyat}" placeholder="Fiyat" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px 12px;font-size:12px;font-family:inherit;outline:none;">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                <input id="ei-desc-${item.urun_id}" value="${(item.aciklama||'').replace(/"/g,'&quot;')}" placeholder="Açıklama" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px 12px;font-size:12px;font-family:inherit;outline:none;">
+                <input id="ei-tag-${item.urun_id}" value="${(item.etiket||'').replace(/"/g,'&quot;')}" placeholder="Etiket" style="background:var(--card-bg);border:1px solid var(--border);color:var(--white);padding:8px 12px;font-size:12px;font-family:inherit;outline:none;">
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="add-btn" style="padding:7px 18px;font-size:10px;" onclick="saveEditMenuItem(${item.urun_id})">Kaydet</button>
+                <button class="action-btn cancel" style="padding:7px 14px;font-size:10px;" onclick="document.getElementById('miedit-${item.urun_id}').style.display='none'">İptal</button>
               </div>
             </div>
           `).join('') : '<div style="font-size:11px;color:var(--muted);padding:8px 0">Henüz ürün yok.</div>'}
@@ -952,6 +1009,23 @@ async function delMenuItem(id) {
   await sb.del('urun', `urun_id=eq.${id}`);
   renderMenu();
   toast('✓ Ürün silindi');
+}
+
+function showEditMenuItem(id) {
+  const el = document.getElementById('miedit-' + id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveEditMenuItem(id) {
+  const name = document.getElementById('ei-name-' + id).value.trim();
+  const price = parseFloat(document.getElementById('ei-price-' + id).value);
+  const desc = document.getElementById('ei-desc-' + id).value.trim();
+  const tag = document.getElementById('ei-tag-' + id).value.trim();
+  if (!name || !price) { alert('Ürün adı ve fiyat zorunludur.'); return; }
+  await sb.patch('urun', { urun_adi: name, fiyat: price, aciklama: desc, etiket: tag }, `urun_id=eq.${id}`);
+  renderMenu();
+  toast('✓ Ürün güncellendi');
 }
 
 // ── MANUEL POST ──────────────────────────────────────
