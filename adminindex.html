@@ -1251,12 +1251,14 @@ function getLocalReviews() {
     try {
       const parsed = JSON.parse(local);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((r, i) => {
-          if (!r.yorum_id) {
-            r.yorum_id = r.id || (1000 + i);
-          }
-          return r;
-        });
+        return parsed.map((r, i) => ({
+          yorum_id: r.yorum_id || r.id || (1000 + i),
+          ad: r.ad || r.name || '',
+          sehir: r.sehir || r.city || '',
+          puan: parseInt(r.puan || r.rating || 5),
+          metin: r.metin || r.text || '',
+          tarih_str: r.tarih_str || r.date || ''
+        }));
       }
     } catch(e) {}
   }
@@ -1360,7 +1362,12 @@ async function saveReviewEdit(id) {
 
   // Aynı metinle veya ad+metinle local/Supabase kontrolü (kendisi hariç)
   const localReviews = getLocalReviews();
-  const isDuplicateLocal = localReviews.some(r => String(r.yorum_id) !== String(id) && r.metin.trim().toLowerCase() === metin.toLowerCase() && r.ad.trim().toLowerCase() === ad.toLowerCase());
+  const isDuplicateLocal = localReviews.some(r => {
+    if (String(r.yorum_id) === String(id)) return false;
+    const rMetin = (r.metin || '').trim().toLowerCase();
+    const rAd = (r.ad || '').trim().toLowerCase();
+    return rMetin === metin.toLowerCase() && rAd === ad.toLowerCase();
+  });
   if (isDuplicateLocal) {
     alert('Bu içerikte başka bir yorum zaten mevcut.');
     return;
@@ -1409,7 +1416,11 @@ async function addReview() {
 
   // Aynı metinle veya ad+metinle local/Supabase kontrolü
   const localReviews = getLocalReviews();
-  const isDuplicateLocal = localReviews.some(r => r.metin.trim().toLowerCase() === metin.toLowerCase() && r.ad.trim().toLowerCase() === ad.toLowerCase());
+  const isDuplicateLocal = localReviews.some(r => {
+    const rMetin = (r.metin || '').trim().toLowerCase();
+    const rAd = (r.ad || '').trim().toLowerCase();
+    return rMetin === metin.toLowerCase() && rAd === ad.toLowerCase();
+  });
   if (isDuplicateLocal) {
     alert('Bu yorum zaten sisteme eklenmiş.');
     return;
