@@ -1042,6 +1042,18 @@ async function addMenuItem() {
   const desc = document.getElementById('miDesc').value.trim();
   const tag = document.getElementById('miTag').value.trim();
   if (!name || !price) { alert('Ürün adı ve fiyat gerekli.'); return; }
+
+  // Aynı isimde ürün var mı kontrolü
+  try {
+    const existing = await sb.query('urun', `select=urun_id&urun_adi=ilike.${encodeURIComponent(name)}`);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu isimde bir menü ürünü zaten mevcut.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Ürün mükerrer kontrolü başarısız oldu:', e);
+  }
+
   try {
     await sb.insert('urun', { urun_adi: name, fiyat: price, kategori_id: catIds[cat], aciklama: desc, etiket: tag, aktif: true });
     renderMenu();
@@ -1078,6 +1090,18 @@ async function saveEditMenuItem(id) {
   const desc = document.getElementById('ei-desc-' + id).value.trim();
   const tag = document.getElementById('ei-tag-' + id).value.trim();
   if (!name || !price) { alert('Ürün adı ve fiyat zorunludur.'); return; }
+
+  // Aynı isimde başka ürün var mı kontrolü
+  try {
+    const existing = await sb.query('urun', `select=urun_id&urun_adi=ilike.${encodeURIComponent(name)}&urun_id=neq.${id}`);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu isimde başka bir menü ürünü zaten mevcut.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Ürün mükerrer kontrolü başarısız oldu:', e);
+  }
+
   try {
     await sb.patch('urun', { urun_adi: name, fiyat: price, aciklama: desc, etiket: tag }, `urun_id=eq.${id}`);
     renderMenu();
@@ -1093,6 +1117,18 @@ async function addManualPost() {
   const platform = document.getElementById('manual-platform').value;
   const topic = document.getElementById('manual-topic') ? document.getElementById('manual-topic').value.trim() : '';
   if (!text) { alert('Post metni boş olamaz.'); return; }
+
+  // Aynı metinle duyuru var mı kontrolü
+  try {
+    const existing = await fetch(`${SUPABASE_URL}/rest/v1/site_posts?select=id&text=eq.${encodeURIComponent(text)}`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu duyuru/post zaten yayınlanmış.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Duyuru mükerrer kontrolü başarısız oldu:', e);
+  }
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/site_posts`, {
       method: 'POST', headers: SB_HEADS,
@@ -1166,6 +1202,18 @@ async function savePostEdit(id) {
   const ta = document.getElementById('post-edit-ta-' + id);
   const text = ta ? ta.value.trim() : '';
   if (!text) { alert('Post metni boş olamaz.'); return; }
+
+  // Aynı metinle başka duyuru var mı kontrolü
+  try {
+    const existing = await fetch(`${SUPABASE_URL}/rest/v1/site_posts?select=id&text=eq.${encodeURIComponent(text)}&id=neq.${id}`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu içerikte başka bir duyuru/post zaten mevcut.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Duyuru mükerrer kontrolü başarısız oldu:', e);
+  }
+
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/site_posts?id=eq.${id}`, {
       method: 'PATCH', headers: SB_HEADS, body: JSON.stringify({ text })
@@ -1310,6 +1358,24 @@ async function saveReviewEdit(id) {
   const metin = document.getElementById('rve-metin-' + id).value.trim();
   if (!ad || !metin) { alert('Ad ve yorum metni zorunludur.'); return; }
 
+  // Aynı metinle veya ad+metinle local/Supabase kontrolü (kendisi hariç)
+  const localReviews = getLocalReviews();
+  const isDuplicateLocal = localReviews.some(r => String(r.yorum_id) !== String(id) && r.metin.trim().toLowerCase() === metin.toLowerCase() && r.ad.trim().toLowerCase() === ad.toLowerCase());
+  if (isDuplicateLocal) {
+    alert('Bu içerikte başka bir yorum zaten mevcut.');
+    return;
+  }
+
+  try {
+    const existing = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id&metin=eq.${encodeURIComponent(metin)}&ad=eq.${encodeURIComponent(ad)}&yorum_id=neq.${id}`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu içerikte başka bir yorum zaten mevcut.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Yorum mükerrer kontrolü başarısız oldu:', e);
+  }
+
   const reviews = getLocalReviews();
   const review = reviews.find(r => String(r.yorum_id) === String(id));
   if (review) {
@@ -1340,6 +1406,24 @@ async function addReview() {
   const metin = document.getElementById('rvText').value.trim();
   const tarih_str = document.getElementById('rvDate').value.trim();
   if (!ad || !metin) { alert('İsim ve yorum metni zorunludur.'); return; }
+
+  // Aynı metinle veya ad+metinle local/Supabase kontrolü
+  const localReviews = getLocalReviews();
+  const isDuplicateLocal = localReviews.some(r => r.metin.trim().toLowerCase() === metin.toLowerCase() && r.ad.trim().toLowerCase() === ad.toLowerCase());
+  if (isDuplicateLocal) {
+    alert('Bu yorum zaten sisteme eklenmiş.');
+    return;
+  }
+
+  try {
+    const existing = await fetch(`${SUPABASE_URL}/rest/v1/site_yorum?select=yorum_id&metin=eq.${encodeURIComponent(metin)}&ad=eq.${encodeURIComponent(ad)}`, { headers: SB_READ }).then(r => r.json()).catch(() => []);
+    if (Array.isArray(existing) && existing.length > 0) {
+      alert('Bu yorum zaten sisteme eklenmiş.');
+      return;
+    }
+  } catch(e) {
+    console.warn('Yorum mükerrer kontrolü başarısız oldu:', e);
+  }
 
   const newReview = {
     yorum_id: Date.now(),
