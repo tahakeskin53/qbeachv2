@@ -405,7 +405,8 @@
       <div class="section-card">
         <div class="section-card-head">
           <div class="section-card-title">Rezervasyon Listesi</div>
-          <div class="rezv-filters" style="margin:0;">
+          <div class="rezv-filters" style="margin:0;display:flex;align-items:center;gap:6px;">
+            <input type="text" id="rezvSearch" placeholder="Müşteri ara..." oninput="searchRezv()" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--white);padding:7px 12px;font-size:10px;font-family:inherit;outline:none;width:150px;border-radius:0;transition:border-color 0.2s;margin-right:6px;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">
             <button class="filter-btn active" onclick="filterRezv('all',this)">Tümü</button>
             <button class="filter-btn" onclick="filterRezv('pending',this)">Bekleyen</button>
             <button class="filter-btn" onclick="filterRezv('confirmed',this)">Onaylı</button>
@@ -736,6 +737,7 @@ async function renderDashboard() {
 
 // ── REZERVASYONLAR ────────────────────────────────────
 let currentFilter = 'all';
+let allReservations = [];
 
 function rezvRow(r, short) {
   const ad = r.musteri ? r.musteri.ad + ' ' + (r.musteri.soyad || '') : '—';
@@ -746,6 +748,7 @@ function rezvRow(r, short) {
   const actions = short ? `<td><button class="action-btn" onclick="showTab('rezervasyonlar',null)">Detay</button></td>` :
     `<td>
       ${r.durum === 'bekleyen' ? `<button class="action-btn confirm" onclick="setStatus(${r.rezervasyon_id},'onaylı')">Onayla</button>` : ''}
+      ${(r.durum === 'bekleyen' || r.durum === 'onaylı') ? `<button class="action-btn cancel" onclick="setStatus(${r.rezervasyon_id},'iptal')">İptal Et</button>` : ''}
       <button class="action-btn" onclick="delRezv(${r.rezervasyon_id})" style="color:rgba(200,16,46,0.4);">Sil</button>
     </td>`;
   return `<tr>
@@ -764,13 +767,35 @@ async function renderRezv(filter) {
   currentFilter = filter;
   let list = await sb.query('rezervasyon', 'select=*,musteri(ad,soyad,telefon)&order=olusturma_zamani.desc');
   if (!Array.isArray(list)) list = [];
+  allReservations = list;
+  applyRezvFilters();
+}
+
+function applyRezvFilters() {
+  let list = [...allReservations];
+  const filter = currentFilter;
   if (filter === 'pending') list = list.filter(r => r.durum === 'bekleyen');
   if (filter === 'confirmed') list = list.filter(r => r.durum === 'onaylı');
   if (filter === 'restoran') list = list.filter(r => r.alan_id === 1);
   if (filter === 'plaj') list = list.filter(r => r.alan_id === 2);
+
+  const query = document.getElementById('rezvSearch')?.value.trim().toLowerCase();
+  if (query) {
+    list = list.filter(r => {
+      const ad = r.musteri ? (r.musteri.ad + ' ' + (r.musteri.soyad || '')).toLowerCase() : '';
+      const telefon = r.musteri ? r.musteri.telefon : '';
+      return ad.includes(query) || telefon.includes(query);
+    });
+  }
+
   const tbody = document.getElementById('rezvTable');
-  tbody.innerHTML = list.map(r => rezvRow(r, false)).join('');
-  document.getElementById('rezvEmpty').style.display = list.length ? 'none' : 'block';
+  if (tbody) tbody.innerHTML = list.map(r => rezvRow(r, false)).join('');
+  const emptyEl = document.getElementById('rezvEmpty');
+  if (emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
+}
+
+function searchRezv() {
+  applyRezvFilters();
 }
 
 function filterRezv(f, btn) {
@@ -815,7 +840,7 @@ async function setStatus(id, durum) {
     await sb.patch('rezervasyon', { durum }, `rezervasyon_id=eq.${id}`);
     renderRezv(currentFilter);
     renderDashboard();
-    toast('✓ Rezervasyon onaylandı');
+    toast(durum === 'onaylı' ? '✓ Rezervasyon onaylandı' : '✓ Rezervasyon iptal edildi');
   } catch(e) {
     alert('Güncellenemedi: ' + e.message);
   }
