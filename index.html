@@ -585,7 +585,8 @@
     .type-btn { font-size: 9px; padding: 10px 8px; }
   }
 </style>
-<link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><link id="gfont-Source-Sans-Pro" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&amp;display=swap"></head>
+<link id="gfont-Roboto" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&amp;display=swap"><link id="gfont-Source-Sans-Pro" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;500;600;700&amp;display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script></head>
 <body data-cc-id="cc-1" style="cursor: crosshair; font-family: &quot;Times New Roman&quot;; background-color: rgb(8, 0, 5);">
 
 <!-- ── NAVBAR ──────────────────────────────────────── -->
@@ -1163,6 +1164,10 @@
             <input type="tel" id="rPhone" placeholder="+90 5xx xxx xx xx">
           </div>
         </div>
+        <div class="form-group">
+          <label>E-posta</label>
+          <input type="email" id="rEmail" placeholder="ornek@email.com">
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>Tarih</label>
@@ -1341,6 +1346,17 @@
 </footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── EmailJS Kurulumu (Vercel rezervasyon e-postası için) ─────
+  // 1. https://emailjs.com → ücretsiz hesap aç
+  // 2. Add New Service → Gmail/Outlook → Service ID'yi buraya yaz
+  // 3. Email Templates → Yeni template oluştur → Template ID'yi yaz
+  // 4. Account → Public Key'i buraya yaz
+  // Template değişkenleri: {{musteri_adi}} {{email}} {{telefon}} {{tarih}} {{saat}}
+  //   {{alan_turu}} {{kisi_sayisi}} {{ozel_gun}} {{notlar}}
+  const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
+  const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+  emailjs.init('YOUR_PUBLIC_KEY');
+
   // ── MySQL API BAĞLANTISI ─────────────────────────────
   const API = 'api.php';
 
@@ -1537,41 +1553,41 @@
   fillSaatler(RESTORAN_SAATLER);
 
   // ── Submit reservation ──────────────────────────────
-async function submitRezervasyon() {
-  const name = document.getElementById('rName').value.trim();
-  const phone = document.getElementById('rPhone').value.trim();
-  const date = document.getElementById('rDate').value;
-  const time = document.getElementById('rTime').value;
-  if (!name || !phone || !date || !time) {
-    alert('Lütfen ad, telefon, tarih ve saat alanlarını doldurun.');
-    return;
+  async function submitRezervasyon() {
+    const name = document.getElementById('rName').value.trim();
+    const phone = document.getElementById('rPhone').value.trim();
+    const date = document.getElementById('rDate').value;
+    const time = document.getElementById('rTime').value;
+    if (!name || !phone || !date || !time) {
+      alert('Lütfen ad, telefon, tarih ve saat alanlarını doldurun.');
+      return;
+    }
+
+    const btn = document.querySelector('.submit-btn');
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gönderiliyor...';
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        musteri_adi: name,
+        email: document.getElementById('rEmail')?.value.trim() || '',
+        telefon: phone,
+        tarih: date,
+        saat: time,
+        alan_turu: currentType === 'restoran' ? 'Restoran' : 'Plaj Alanı',
+        kisi_sayisi: document.getElementById('rGuests').value,
+        ozel_gun: document.getElementById('rOccasion')?.value || '-',
+        notlar: document.getElementById('rNotes').value || '-'
+      });
+      document.getElementById('rezv-form-content').style.display = 'none';
+      document.getElementById('rezv-success').style.display = 'block';
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = origText;
+      alert('Rezervasyon gönderilemedi. Lütfen telefonla arayın: +90 (242) 000 00 00');
+    }
   }
-
-  // Önce müşteriyi kaydet
-  const musteriData = await sb.insert('musteri', {
-    ad: name,
-    soyad: '',
-    telefon: phone,
-    email: ''
-  });
-
-  const musteri_id = musteriData[0].musteri_id;
-  const alan_id = currentType === 'restoran' ? 1 : 2;
-
-  // Rezervasyonu kaydet
-  await sb.insert('rezervasyon', {
-    musteri_id: musteri_id,
-    alan_id: alan_id,
-    tarih: date,
-    saat: time,
-    kisi_sayisi: parseInt(document.getElementById('rGuests').value),
-    durum: 'bekleyen',
-    notlar: document.getElementById('rNotes').value
-  });
-
-  document.getElementById('rezv-form-content').style.display = 'none';
-  document.getElementById('rezv-success').style.display = 'block';
-}
 
   // ── Set min date ────────────────────────────────────
   document.getElementById('rDate').min = new Date().toISOString().split('T')[0];
